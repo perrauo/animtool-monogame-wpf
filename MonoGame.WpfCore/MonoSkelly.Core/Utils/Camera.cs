@@ -101,15 +101,15 @@ namespace MonoSkelly.Core
         /// </summary>
         public Vector2 Rotation;
 
-        // graphic device manager
-        GraphicsDeviceManager _deviceManager;
+		// graphic device manager
+		GraphicsDevice _graphicsDevice;
 
         /// <summary>
         /// Create a new camera instance
         /// </summary>
-        public Camera(GraphicsDeviceManager deviceManager)
+        public Camera(GraphicsDevice graphicsDevice)
         {
-            _deviceManager = deviceManager;
+			_graphicsDevice = graphicsDevice;
         }
 
         /// <summary>
@@ -225,9 +225,9 @@ namespace MonoSkelly.Core
             // if we don't have alternative screen size defined, get current backbuffer size
             else
             {
-                var deviceManager = _deviceManager;
-                width = deviceManager.PreferredBackBufferWidth;
-                height = deviceManager.PreferredBackBufferHeight;
+                var parameters = _graphicsDevice.PresentationParameters;
+                width = parameters.BackBufferWidth;
+                height = parameters.BackBufferHeight;
             }
 
             // calc aspect ratio
@@ -279,7 +279,7 @@ namespace MonoSkelly.Core
         public Ray RayFrom2dPoint(Vector2 point)
         {
             // get graphic device
-            GraphicsDevice device = _deviceManager.GraphicsDevice;
+            //GraphicsDevice device = _deviceManager.GraphicsDevice;
 
             // convert point to near and far points as 3d vectors
             Vector3 nearsource = new Vector3(point.X, point.Y, 0f);
@@ -289,11 +289,11 @@ namespace MonoSkelly.Core
             Matrix world = Matrix.CreateTranslation(0, 0, 0);
 
             // convert near point to world space
-            Vector3 nearPoint = device.Viewport.Unproject(nearsource,
+            Vector3 nearPoint = _graphicsDevice.Viewport.Unproject(nearsource,
                 Projection, View, world);
 
             // convert far point to world space
-            Vector3 farPoint = device.Viewport.Unproject(farsource,
+            Vector3 farPoint = _graphicsDevice.Viewport.Unproject(farsource,
                 Projection, View, world);
             
             // get direction

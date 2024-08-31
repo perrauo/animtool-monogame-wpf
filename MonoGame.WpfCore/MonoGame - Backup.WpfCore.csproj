@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
-	<MonoGamePlatform>Windows</MonoGamePlatform>
+	<MonoGamePlatform>DesktopGL</MonoGamePlatform>
     <LangVersion>12</LangVersion>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
@@ -28,8 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame\MonoGame.Framework.Content.Pipeline\MonoGame.Framework.Content.Pipeline.csproj" />
     <ProjectReference Include="..\MonoGame\MonoGame.Framework\MonoGame.Framework.WindowsDX.csproj" />
-    <ProjectReference Include="..\MonoGame\Tools\MonoGame.Content.Builder.Editor.Launcher.Bootstrap\MonoGame.Content.Builder.Editor.Launcher.Bootstrap.csproj" />
   </ItemGroup>
 </Project>

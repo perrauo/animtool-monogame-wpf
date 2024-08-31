@@ -1,14 +1,14 @@
-﻿using System;
+﻿//using System;
 
-namespace MonoSkelly.Editor
-{
-    //public static class Program
-    //{
-    //    //[STAThread]
-    //    //static void Main()
-    //    //{
-    //    //    using (var game = new SkellyEditor())
-    //    //        game.Run();
-    //    //}
-    //}
-}
+//namespace MonoSkelly.Editor
+//{
+//    public static class Program
+//    {
+//        [STAThread]
+//        static void Main()
+//        {
+//            using(var game = new SkellyEditor())
+//                game.Run();
+//        }
+//    }
+//}

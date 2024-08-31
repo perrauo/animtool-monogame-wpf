@@ -1,9 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.156
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.WpfCore", "MonoGame.WpfCore\MonoGame.WpfCore.csproj", "{FD990210-B23B-44A8-A99D-7ECDD653E4CB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{52556DF8-E718-414F-BF0D-80A663BF539C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Framework.WindowsDX", "MonoGame\MonoGame.Framework\MonoGame.Framework.WindowsDX.csproj", "{89AD97D2-544C-4BA5-92CA-C89ADCC32DFA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Framework.DesktopGL", "MonoGame\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj", "{F18C2E29-74D6-4A17-A982-A156009CDAF0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Framework.Content.Pipeline", "MonoGame\MonoGame.Framework.Content.Pipeline\MonoGame.Framework.Content.Pipeline.csproj", "{B27935B7-E96C-4076-A142-0B2796E2CA44}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Content.Builder.Editor.Launcher.Bootstrap", "MonoGame\Tools\MonoGame.Content.Builder.Editor.Launcher.Bootstrap\MonoGame.Content.Builder.Editor.Launcher.Bootstrap.csproj", "{87304D58-7C4A-4875-97B0-16F17218A02F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +25,22 @@ Global
 		{FD990210-B23B-44A8-A99D-7ECDD653E4CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD990210-B23B-44A8-A99D-7ECDD653E4CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD990210-B23B-44A8-A99D-7ECDD653E4CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89AD97D2-544C-4BA5-92CA-C89ADCC32DFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89AD97D2-544C-4BA5-92CA-C89ADCC32DFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89AD97D2-544C-4BA5-92CA-C89ADCC32DFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89AD97D2-544C-4BA5-92CA-C89ADCC32DFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F18C2E29-74D6-4A17-A982-A156009CDAF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F18C2E29-74D6-4A17-A982-A156009CDAF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F18C2E29-74D6-4A17-A982-A156009CDAF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F18C2E29-74D6-4A17-A982-A156009CDAF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B27935B7-E96C-4076-A142-0B2796E2CA44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B27935B7-E96C-4076-A142-0B2796E2CA44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B27935B7-E96C-4076-A142-0B2796E2CA44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B27935B7-E96C-4076-A142-0B2796E2CA44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87304D58-7C4A-4875-97B0-16F17218A02F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87304D58-7C4A-4875-97B0-16F17218A02F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87304D58-7C4A-4875-97B0-16F17218A02F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87304D58-7C4A-4875-97B0-16F17218A02F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -44,15 +44,15 @@ public class MonoGameViewModel : ViewModel, IMonoGameViewModel
 
     public IGraphicsDeviceService GraphicsDeviceService { get; set; } = default!;
     protected GraphicsDevice GraphicsDevice => GraphicsDeviceService?.GraphicsDevice!;
-    protected MonoGameServiceProvider Services { get; private set; } = default!;
+    protected MonoGameServiceProvider Services { get; set; } = default!;
     protected ContentManager Content { get; set; } = default!;
     protected List<IGameComponent> Components { get; } = new();
 
     public virtual void Initialize()
     {
-        Services = new MonoGameServiceProvider();
-        Services.AddService(GraphicsDeviceService);
-        Content = new ContentManager(Services) { RootDirectory = "Content" };
+        //Services = new MonoGameServiceProvider();
+        //Services.AddService(GraphicsDeviceService);
+        //Content = new ContentManager(Services) { RootDirectory = "Content" };
     }
 
     protected void PostInitialize()
@@ -82,7 +82,7 @@ public class MonoGameViewModel : ViewModel, IMonoGameViewModel
             foreach (var component in Components)
                 if (component is IDrawable drawable && drawable.Visible)
                     drawable.Draw(gameTime);
-            Draw(gameTime);
+            Draw(gameTime);            
             EndDraw();
         }
     }

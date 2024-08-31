@@ -5,6 +5,9 @@ using GeonBit.UI.Entities.TextValidators;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
+using MonoGame.WpfCore.MonoGameControls;
+
 using MonoSkelly.Core;
 
 using System;
@@ -18,7 +21,8 @@ namespace MonoSkelly.Editor
     /// </summary>
     public class SkellyEditor : Game
     {
-        private GraphicsDeviceManager _graphics;
+		GraphicsDevice _graphicsDevice;
+		//private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
         // currently presented skeleton and camera
@@ -103,12 +107,20 @@ namespace MonoSkelly.Editor
         /// <summary>
         /// Create editor.
         /// </summary>
-        public SkellyEditor()
+        public SkellyEditor(GraphicsDevice graphicsDevice)
         {
-            _graphics = new GraphicsDeviceManager(this);
+            //_graphics = new GraphicsDeviceManager(this);
+            _graphicsDevice = graphicsDevice;
             Content.RootDirectory = "Content";
             IsMouseVisible = false;
         }
+
+        public void CallProtectedInitialize()
+        {
+            Initialize();
+
+		}
+
 
         /// <summary>
         /// Initialize editor.
@@ -117,24 +129,24 @@ namespace MonoSkelly.Editor
         {
             // set resolution and fullscreen
             var windowBarHeight = 30;
-            _graphics.SynchronizeWithVerticalRetrace = true;
-            _graphics.PreferredBackBufferWidth = _graphics.GraphicsDevice.DisplayMode.Width;
-            _graphics.PreferredBackBufferHeight = _graphics.GraphicsDevice.DisplayMode.Height - windowBarHeight;
-            _graphics.IsFullScreen = false;
-            _graphics.ApplyChanges();
+            //_graphics.SynchronizeWithVerticalRetrace = true;
+            //_graphics.PreferredBackBufferWidth = _graphics.GraphicsDevice.DisplayMode.Width;
+            //_graphics.PreferredBackBufferHeight = _graphics.GraphicsDevice.DisplayMode.Height - windowBarHeight;
+            //_graphics.IsFullScreen = false;
+            //_graphics.ApplyChanges();
 
             // set window stuff
-            Window.Title = "MonoSkelly - Editor";
-            Window.IsBorderless = false;
-            Window.AllowUserResizing = false;
-            Window.Position = new Point(0, windowBarHeight);
+            //Window.Title = "MonoSkelly - Editor";
+            //Window.IsBorderless = false;
+            //Window.AllowUserResizing = false;
+            //Window.Position = new Point(0, windowBarHeight);
     
             // init ui
             InitUI();
 
             // create skeleton and camera
             _skeleton = new Skeleton();
-            _camera = new Camera(_graphics);
+            _camera = new Camera(_graphicsDevice);
             ResetCamera();
 
             // make sure saves folder exist
@@ -1660,10 +1672,15 @@ Editor version: {{L_GREEN}}1.0.0{{DEFAULT}}.", size: new Vector2(600, 400));
                 }, new Entity[] { filesList });
         }
 
-        /// <summary>
-        /// Load editor content.
-        /// </summary>
-        protected override void LoadContent()
+		public void CallProtectedLoadContent()
+		{
+			LoadContent();
+		}
+
+		/// <summary>
+		/// Load editor content.
+		/// </summary>
+		protected override void LoadContent()
         {
             // load basic models
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -1685,6 +1702,11 @@ Editor version: {{L_GREEN}}1.0.0{{DEFAULT}}.", size: new Vector2(600, 400));
 
         // time until we advance animation step
         double _timeForNextAdvanceStep = 0;
+
+        public void CallProtectedUpdate(GameTime gameTime)
+        {
+            Update(gameTime);
+		}
 
         /// <summary>
         /// Update scene and camera controls.
@@ -1853,7 +1875,12 @@ Editor version: {{L_GREEN}}1.0.0{{DEFAULT}}.", size: new Vector2(600, 400));
         /// <summary>
         /// Draw scene.
         /// </summary>
-        protected override void Draw(GameTime gameTime)
+        public void CallProtectedDraw(GameTime gameTime)
+        {
+            Draw(gameTime);
+		}
+
+		protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 

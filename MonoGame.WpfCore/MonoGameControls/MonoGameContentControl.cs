@@ -26,6 +26,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -166,16 +168,43 @@ public sealed class MonoGameContentControl : ContentControl, IDisposable
         SizeChanged += (sender, args) => _viewModel?.SizeChanged(sender, args);
     }
 
-    protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
-    {
-        base.OnRenderSizeChanged(sizeInfo);
+	private DispatcherTimer resizeTimer;
+	private bool isTimerRunning = false;
 
-        // sometimes OnRenderSizeChanged happens before OnLoaded.
-        Start();
-        ResetBackBufferReference();
-    }
+	protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+	{
+		base.OnRenderSizeChanged(sizeInfo);
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+        if(_direct3DImage == null)
+            return;
+
+        if(_renderTarget == null || (!sizeInfo.WidthChanged && !sizeInfo.HeightChanged))
+		{
+			Start();
+			ResetBackBufferReference();
+		}
+        else
+        {
+            if(resizeTimer == null)
+            {
+                resizeTimer = new DispatcherTimer();
+                resizeTimer.Interval = TimeSpan.FromMilliseconds(500); // Adjust the interval as needed
+                resizeTimer.Tick += ResizeTimer_Tick;
+            }
+
+            resizeTimer.Stop();
+            resizeTimer.Start();
+        }
+	}
+
+	private void ResizeTimer_Tick(object sender, EventArgs e)
+	{
+		resizeTimer.Stop();
+		Start();
+		ResetBackBufferReference();
+	}
+
+	private void OnLoaded(object sender, RoutedEventArgs e)
     {
         Start();
     }
@@ -278,7 +307,7 @@ public sealed class MonoGameContentControl : ContentControl, IDisposable
                     _viewModel?.Draw(_gameTime);
 
                     GraphicsDevice.Flush();
-                    _direct3DImage.AddDirtyRect(new Int32Rect(0, 0, (int)ActualWidth, (int)ActualHeight));
+                    _direct3DImage.AddDirtyRect(new Int32Rect(0, 0, _renderTarget.Width, _renderTarget.Height));
                 }
             }
             finally

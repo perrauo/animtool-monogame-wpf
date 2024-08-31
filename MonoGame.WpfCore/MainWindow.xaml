@@ -34,16 +34,26 @@
                 <Separator />
                 <MenuItem Header="Select _All" />
             </MenuItem>
-            <MenuItem Header="_Help">
+			<MenuItem Header="_Display">
+				<MenuItem Header="_Undo" />
+				<MenuItem Header="_Redo" />
+				<Separator />
+				<MenuItem Header="Cu_t" />
+				<MenuItem Header="_Copy" />
+				<MenuItem Header="_Paste" />
+				<MenuItem Header="_Delete" />
+				<Separator />
+				<MenuItem Header="Select _All" />
+			</MenuItem>
+			<MenuItem Header="_Help">
                 <MenuItem Header="_About MonoGame.WpfCore" />
             </MenuItem>
         </Menu>
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+			</Grid.ColumnDefinitions>
 
             <monoGameControls:MonoGameContentControl Grid.Column="0">
                 <monoGameControls:MonoGameContentControl.DataContext>
@@ -51,11 +61,6 @@
                 </monoGameControls:MonoGameContentControl.DataContext>
             </monoGameControls:MonoGameContentControl>
 
-            <monoGameControls:MonoGameContentControl Grid.Column="1">
-                <monoGameControls:MonoGameContentControl.DataContext>
-                    <local:MainWindowViewModel />
-                </monoGameControls:MonoGameContentControl.DataContext>
-            </monoGameControls:MonoGameContentControl>
         </Grid>
     </DockPanel>
 </Window>

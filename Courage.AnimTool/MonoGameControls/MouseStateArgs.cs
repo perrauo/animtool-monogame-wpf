@@ -3,7 +3,7 @@ using System.Windows.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
-namespace MonoGame.WpfCore.MonoGameControls;
+namespace Courage.AnimTool;
 
 public class MouseStateArgs
 {

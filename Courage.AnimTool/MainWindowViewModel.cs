@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoGame.WpfCore.MonoGameControls;
+using Courage.AnimTool;
 
 using MonoSkelly.Editor;
 
-namespace MonoGame.WpfCore;
+namespace Courage.AnimTool;
 
 public class MainWindowViewModel : MonoGameViewModel
 {

@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="Courage.AnimTool.AnimsPanel"
+             x:Name="FloatingPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:animTool="clr-namespace:Courage.AnimTool"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="600" Width="600" Height="800">
+	<Border BorderBrush="Black" BorderThickness="1" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}">
+		<Grid>
+			<StackPanel Margin="10,0,0,0">
+				<TextBlock Text="Animations:" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+				<Separator Margin="0,5,0,0"/>
+				<TextBlock Text="Select Animation To Edit:" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+				<ComboBox>
+					<ComboBoxItem Content="MyAnimation1"/>
+					<ComboBoxItem Content="MyAnimation2"/>
+				</ComboBox>
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+					<Button Content="New" Margin="0,0,5,0"/>
+					<Button Content="Clone" Margin="0,0,5,0"/>
+					<Button Content="Delete"/>
+				</StackPanel>
+				<TextBlock Text="Select Animation Step:" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+					<Button Content="New" Margin="0,0,5,0"/>
+					<Button Content="Split" Margin="0,0,5,0"/>
+					<Button Content="Delete"/>
+				</StackPanel>
+				<Separator Margin="0,5,0,0"/>
+				<TextBlock Text="Animation Timeline" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+				<!-- Placeholder for Timebar -->
+				<TextBlock Text="0 / 0 (sec)" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+				<Button Content="Play" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+					<CheckBox/>
+					<TextBlock Text="Repeating Animation" VerticalAlignment="Center" Margin="5,0,0,0"/>
+				</StackPanel>
+				<Separator Margin="0,5,0,0"/>
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+					<TextBlock Text="Step Duration:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+					<TextBox Width="100"/>
+				</StackPanel>
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+					<TextBlock Text="Step Name:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+					<TextBox Width="100"/>
+				</StackPanel>
+				<TextBlock Text="Move and Scale Interpolation:" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+				<ComboBox>
+					<ComboBoxItem Content="Linear"/>
+				</ComboBox>
+				<TextBlock Text="Rotation Interpolation:" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+				<ComboBox>
+					<ComboBoxItem Content="SphericalLinear"/>
+				</ComboBox>
+			</StackPanel>
+			<Thumb Name="ResizeThumb" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="10" Height="10" Cursor="SizeNWSE" DragDelta="ResizeThumb_DragDelta"/>
+		</Grid>
+	</Border>
+</UserControl>

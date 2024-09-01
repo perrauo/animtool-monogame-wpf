@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace MonoGame.WpfCore;
+namespace Courage.AnimTool;
 
 public class ViewModel : INotifyPropertyChanged
 {

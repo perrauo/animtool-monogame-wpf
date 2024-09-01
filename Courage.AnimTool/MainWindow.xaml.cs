@@ -1,8 +1,6 @@
 ﻿using System.Windows;
 
-namespace MonoGame.WpfCore;
-
-
+namespace Courage.AnimTool;
 
 public partial class MainWindow : Window
 {
@@ -11,6 +9,8 @@ public partial class MainWindow : Window
 
 	[System.Runtime.InteropServices.DllImport("nvapi.dll", EntryPoint = "fake")]
 	private static extern int LoadNvApi32();
+
+	//FloatingPanel _floatingWindow;
 
 	void TryForceHighPerformanceGpu()
 	{
@@ -21,7 +21,7 @@ public partial class MainWindow : Window
 			else
 				LoadNvApi32();
 		}
-		catch { } // this will always be triggered, so just catch it and do nothing :P
+		catch { }
 	}
 
 	public MainWindow()
@@ -29,5 +29,13 @@ public partial class MainWindow : Window
 		TryForceHighPerformanceGpu();
 
 		InitializeComponent();
-    }
+
+		//_floatingWindow = new FloatingWindow();
+		//_floatingWindow.StateChanged += (s, e) =>
+		//{
+		//	_floatingWindow.Owner = this;
+		//	_floatingWindow.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+		//};
+		//_floatingWindow.Show();
+	}
 }

@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using Microsoft.Xna.Framework;
 
-namespace MonoGame.WpfCore.MonoGameControls;
+namespace Courage.AnimTool;
 
 public class DragStateArgs
 {

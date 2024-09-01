@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace MonoGame.WpfCore.MonoGameControls;
+namespace Courage.AnimTool;
 
 public static class WpfToMonoGameExtensions
 {

@@ -2,10 +2,10 @@
     "$schema": "http://json.schemastore.org/template",
     "author": "Dylan Wilson",
     "classifications": ["MonoGame", "WPF"],
-    "identity": "CraftworkGames.MonoGame.WpfCore",
+    "identity": "CraftworkGames.Courage.AnimTool",
     "name": "MonoGame WPF Application",
     "shortName": "monogamewpf",
-    "sourceName": "MonoGame.WpfCore",
+    "sourceName": "Courage.AnimTool",
     "sources": [{
         "exclude": [
             "**/.vs/**",
@@ -17,6 +17,6 @@
             "**/.idea/**",
             "**/*.user"
         ],
-        "source": "./MonoGame.WpfCore/"
+        "source": "./Courage.AnimTool/"
     }]
 }

@@ -1,4 +1,4 @@
-# MonoGame.WpfCore
+# Courage.AnimTool
 
 MonoGame embedded inside a WPF app as a `dotnet new` template.
 
@@ -17,7 +17,7 @@ This template uses .NET Core 6. If you're having trouble getting it to compile m
 To install the `dotnet new` template, clone this repository locally and [install the template from a local directory](https://docs.microsoft.com/en-us/dotnet/core/tools/custom-templates#to-install-a-template-from-a-file-system-directory).
 
 ```
-dotnet new install MonoGame.WpfCore
+dotnet new install Courage.AnimTool
 ```
 
 After the template is installed you should see it in the list. To create a new project, first create an empty directory then run the template.

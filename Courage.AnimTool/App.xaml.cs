@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace MonoGame.WpfCore;
+namespace Courage.AnimTool;
 
 public partial class App : Application
 {

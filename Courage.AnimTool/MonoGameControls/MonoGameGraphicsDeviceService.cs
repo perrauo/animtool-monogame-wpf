@@ -4,7 +4,7 @@ using System.Windows.Interop;
 using Microsoft.Xna.Framework.Graphics;
 using SharpDX.Direct3D9;
 
-namespace MonoGame.WpfCore.MonoGameControls;
+namespace Courage.AnimTool;
 
 public class MonoGameGraphicsDeviceService : IGraphicsDeviceService, IDisposable
 {

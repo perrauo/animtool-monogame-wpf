@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-using MonoGame.WpfCore.MonoGameControls;
+using Courage.AnimTool;
 
 using MonoSkelly.Core;
 
@@ -104,12 +104,15 @@ namespace MonoSkelly.Editor
         // name to use for default pose without animation
         static string DefaultNoneAnimationName = "Default Pose";
 
+        MainWindow _mainWindow;
+
         /// <summary>
         /// Create editor.
         /// </summary>
-        public SkellyEditor(GraphicsDevice graphicsDevice)
+        public SkellyEditor(MainWindow mainWindow, GraphicsDevice graphicsDevice)
         {
             //_graphics = new GraphicsDeviceManager(this);
+            _mainWindow = mainWindow;
             _graphicsDevice = graphicsDevice;
             Content.RootDirectory = "Content";
             IsMouseVisible = false;

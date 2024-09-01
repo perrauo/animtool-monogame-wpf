@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace MonoGame.WpfCore.MonoGameControls;
+namespace Courage.AnimTool;
 
 public interface IMonoGameViewModel : IDisposable
 {

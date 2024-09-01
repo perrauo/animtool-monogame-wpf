@@ -1,5 +1,5 @@
-[submodule "MonoGame.WpfCore/GeonBit.UI"]
-	path = MonoGame.WpfCore/GeonBit.UI
+[submodule "Courage.AnimTool/GeonBit.UI"]
+	path = Courage.AnimTool/GeonBit.UI
 	url = https://github.com/RonenNess/GeonBit.UI.git
 [submodule "External/MonoGame"]
 	path = MonoGame

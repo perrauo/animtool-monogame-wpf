@@ -44,7 +44,7 @@
 				<MenuItem x:Name="AboutMenuItem" Header="_About Courage.AnimTool" />
 			</MenuItem>
 		</Menu>
-
+		<animTool:TimelineControl x:Name="TimelineControl" Background="LightGray" DockPanel.Dock="Bottom" />
 		<Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
@@ -57,8 +57,8 @@
 			</animTool:MonoGameContentControl>
 
 			<Canvas>
-				<animTool:AnimsPanel x:Name="AnimsPanel" Background="LightGray" Canvas.Left="10" Canvas.Top="10" />
-				<animTool:BonesAndTransformsPanel x:Name="BonesAndTransformsPanel" Background="LightGray" Canvas.Left="200" Canvas.Top="10" />
+				<animTool:AnimsPanel x:Name="AnimsPanel" Background="LightGray" Canvas.Left="-215" Canvas.Top="38" Height="442" Width="615" />
+				<animTool:BonesAndTransformsPanel x:Name="BonesAndTransformsPanel" Background="LightGray" Canvas.Left="446" Canvas.Top="38" HorizontalAlignment="Left" VerticalAlignment="Top" Height="356" Width="551" />
 			</Canvas>
 		</Grid>
 	</DockPanel>

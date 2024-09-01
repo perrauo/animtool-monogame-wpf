@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Courage.AnimTool;
 
 using MonoSkelly.Editor;
+using Microsoft.Xna.Framework.Input;
 
 namespace Courage.AnimTool;
 
@@ -23,8 +24,10 @@ public class MainWindowViewModel : MonoGameViewModel
     {
         base.Initialize();
 		_editor = new SkellyEditor(GraphicsDevice);
+        //Mouse.PrimaryWindow
         _editor.Services.AddService(GraphicsDeviceService);
         _editor.CallProtectedInitialize();
+
 	}
 
 
@@ -32,6 +35,8 @@ public class MainWindowViewModel : MonoGameViewModel
     {
         base.LoadContent();
         _editor.CallProtectedLoadContent();
+        // Run one frame to activate the platform
+        _editor.RunOneFrame();
     }
 
     public override void OnMouseUp(MouseStateArgs mouseState)
@@ -42,6 +47,7 @@ public class MainWindowViewModel : MonoGameViewModel
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
+        //_editor.RunOneFrame();
         _editor.CallProtectedUpdate(gameTime);
 
         //_position = GraphicsDevice.Viewport.Bounds.Center.ToVector2();

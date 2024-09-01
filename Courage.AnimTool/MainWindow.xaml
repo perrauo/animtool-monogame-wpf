@@ -14,29 +14,34 @@
 	<DockPanel LastChildFill="True">
 		<Menu DockPanel.Dock="Top">
 			<MenuItem Header="_File">
-				<MenuItem Header="_New" />
-				<MenuItem Header="_Open..." />
+				<MenuItem x:Name="NewMenuItem" Header="_New" />
+				<MenuItem x:Name="LoadMenuItem" Header="Load..." />
 				<Separator />
-				<MenuItem Header="_Save" />
-				<MenuItem Header="Save _As..." />
+				<MenuItem x:Name="SaveMenuItem" Header="_Save" />
+				<MenuItem x:Name="SaveAsMenuItem" Header="Save _As..." />
 				<Separator />
-				<MenuItem Header="E_xit" />
+				<MenuItem x:Name="ExitMenuItem" Header="Exit" />
 			</MenuItem>
 			<MenuItem Header="_Edit">
-				<MenuItem Header="_Undo" />
-				<MenuItem Header="_Redo" />
+				<MenuItem x:Name="UndoMenuItem" Header="_Undo" />
+				<MenuItem x:Name="RedoMenuItem" Header="_Redo" />
 				<Separator />
-				<MenuItem Header="Cu_t" />
-				<MenuItem Header="_Copy" />
-				<MenuItem Header="_Paste" />
-				<MenuItem Header="_Delete" />
+				<MenuItem x:Name="CutMenuItem" Header="Cu_t" />
+				<MenuItem x:Name="CopyMenuItem" Header="_Copy" />
+				<MenuItem x:Name="PasteMenuItem" Header="_Paste" />
+				<MenuItem x:Name="DeleteMenuItem" Header="_Delete" />
 				<Separator />
-				<MenuItem Header="Select _All" />
+				<MenuItem x:Name="SelectAllMenuItem" Header="Select _All" />
 			</MenuItem>
 			<MenuItem Header="_Display">
+				<MenuItem x:Name="ShowHandlesMenuItem" Header="Show _Handles" />
+				<MenuItem x:Name="ShowBonesMenuItem" Header="Show _Bones" />
+				<MenuItem x:Name="BonesOutlineMenuItem" Header="Bones _Outline" />
+				<MenuItem x:Name="EnableLightingMenuItem" Header="Enable _Lighting" />
+				<MenuItem x:Name="ResetCameraMenuItem" Header="Reset _Camera" />
 			</MenuItem>
 			<MenuItem Header="_Help">
-				<MenuItem Header="_About Courage.AnimTool" />
+				<MenuItem x:Name="AboutMenuItem" Header="_About Courage.AnimTool" />
 			</MenuItem>
 		</Menu>
 

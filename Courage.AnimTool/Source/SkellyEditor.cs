@@ -13,6 +13,13 @@ using MonoSkelly.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using Button = GeonBit.UI.Entities.Button;
+using CheckBox = GeonBit.UI.Entities.CheckBox;
+using Panel = GeonBit.UI.Entities.Panel;
+using Image = GeonBit.UI.Entities.Image;
+//using static System.Net.Mime.MediaTypeNames;
 
 namespace MonoSkelly.Editor
 {
@@ -79,7 +86,7 @@ namespace MonoSkelly.Editor
         TextInput _animationStepNameInput;
         DropDown _animationStepRotateInterpolation;
         DropDown _animationStepMoveAndScaleInterpolation;
-        Image _animationPlayBtn;
+		Image _animationPlayBtn;
 
         // convert bone full path to index in bones list.
         Dictionary<string, int> _fullPathToBoneListIndex;
@@ -104,15 +111,19 @@ namespace MonoSkelly.Editor
         // name to use for default pose without animation
         static string DefaultNoneAnimationName = "Default Pose";
 
-        MainWindow _mainWindow;
+        private AnimsPanel _animsPanel;
 
-        /// <summary>
-        /// Create editor.
-        /// </summary>
-        public SkellyEditor(MainWindow mainWindow, GraphicsDevice graphicsDevice)
+		private BonesAndTransformsPanel _bonesAndTransformsPanel;
+
+        private MainWindow _mainWindow;
+
+		/// <summary>
+		/// Create editor.
+		/// </summary>
+		public SkellyEditor(GraphicsDevice graphicsDevice)
         {
             //_graphics = new GraphicsDeviceManager(this);
-            _mainWindow = mainWindow;
+            //_mainWindow = mainWindow;
             _graphicsDevice = graphicsDevice;
             Content.RootDirectory = "Content";
             IsMouseVisible = false;
@@ -130,8 +141,13 @@ namespace MonoSkelly.Editor
         /// </summary>
         protected override void Initialize()
         {
-            // set resolution and fullscreen
-            var windowBarHeight = 30;
+            _mainWindow = (MainWindow)Application.Current.MainWindow;
+			_animsPanel = _mainWindow.FindChild<AnimsPanel>();
+            _bonesAndTransformsPanel = _mainWindow.FindChild<BonesAndTransformsPanel>();
+
+
+			// set resolution and fullscreen
+			var windowBarHeight = 30;
             //_graphics.SynchronizeWithVerticalRetrace = true;
             //_graphics.PreferredBackBufferWidth = _graphics.GraphicsDevice.DisplayMode.Width;
             //_graphics.PreferredBackBufferHeight = _graphics.GraphicsDevice.DisplayMode.Height - windowBarHeight;
@@ -175,11 +191,16 @@ namespace MonoSkelly.Editor
 
             // file menu
             mainMenuLayout.AddMenu("File", 220);
-            mainMenuLayout.AddItemToMenu("File", "New Empty", PressedTopMenu_New);
-            mainMenuLayout.AddItemToMenu("File", "Save", PressedTopMenu_Save);
-            mainMenuLayout.AddItemToMenu("File", "Save As", PressedTopMenu_SaveAs);
-            mainMenuLayout.AddItemToMenu("File", "Load", PressedTopMenu_Load);
-            mainMenuLayout.AddItemToMenu("File", "Exit", PressedTopMenu_Exit);
+            _mainWindow.NewMenuItem.Click += PressedTopMenu_New;
+			//mainMenuLayout.AddItemToMenu("File", "New Empty", PressedTopMenu_New);
+			_mainWindow.SaveMenuItem.Click += PressedTopMenu_Save;
+			//mainMenuLayout.AddItemToMenu("File", "Save", PressedTopMenu_Save);
+			_mainWindow.SaveAsMenuItem.Click += PressedTopMenu_SaveAs;
+			//mainMenuLayout.AddItemToMenu("File", "Save As", PressedTopMenu_SaveAs);
+			_mainWindow.LoadMenuItem.Click += PressedTopMenu_Load;
+            _mainWindow.ExitMenuItem.Click += PressedTopMenu_Exit;
+			//mainMenuLayout.AddItemToMenu("File", "Load", PressedTopMenu_Load);
+			//mainMenuLayout.AddItemToMenu("File", "Exit", PressedTopMenu_Exit);
 
             // display menu
             mainMenuLayout.AddMenu("Display", 280);
@@ -213,28 +234,28 @@ namespace MonoSkelly.Editor
             _bonesPanel.AddChild(_bonesList);
 
             // add bone button
-            var newBoneBtn = new Button("New Bone", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.445f, -1f));
-            newBoneBtn.OnClick = CreateBoneBtn;
-            newBoneBtn.ToolTipText = "Create a new bone under selected bone. This will add the new bone to all animations.";
-            _bonesPanel.AddChild(newBoneBtn);
+            //var newBoneBtn = new Button("New Bone", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.445f, -1f));
+            //newBoneBtn.OnClick = CreateBoneBtn;
+            //newBoneBtn.ToolTipText = "Create a new bone under selected bone. This will add the new bone to all animations.";
+            //_bonesPanel.AddChild(newBoneBtn);
 
-            // delete bone button
-            var deleteBoneBtn = new Button("Delete Bone", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.555f, -1f));
-            deleteBoneBtn.OnClick = DeleteSelectedBoneBtn;
-            deleteBoneBtn.ToolTipText = "Delete selected bone and everything under it. This will remove bone from all animations.";
-            _bonesPanel.AddChild(deleteBoneBtn);
+            //// delete bone button
+            //var deleteBoneBtn = new Button("Delete Bone", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.555f, -1f));
+            //deleteBoneBtn.OnClick = DeleteSelectedBoneBtn;
+            //deleteBoneBtn.ToolTipText = "Delete selected bone and everything under it. This will remove bone from all animations.";
+            //_bonesPanel.AddChild(deleteBoneBtn);
 
-            // rename bone button
-            var renameBoneBtn = new Button("Rename", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.6f, -1f));
-            renameBoneBtn.OnClick = RenameBoneBtn;
-            renameBoneBtn.ToolTipText = "Rename selected bone. This will rename the bone and its children under all animations.";
-            _bonesPanel.AddChild(renameBoneBtn);
+            //// rename bone button
+            //var renameBoneBtn = new Button("Rename", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.6f, -1f));
+            //renameBoneBtn.OnClick = RenameBoneBtn;
+            //renameBoneBtn.ToolTipText = "Rename selected bone. This will rename the bone and its children under all animations.";
+            //_bonesPanel.AddChild(renameBoneBtn);
 
-            // clone bone button
-            var cloneBoneBtn = new Button("Clone", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.4f, -1f));
-            cloneBoneBtn.OnClick = CloneSelectedBoneBtn;
-            cloneBoneBtn.ToolTipText = "Clone selected bone with all its children. This will add the cloned bones to all animations, but won't clone the per-animation transformations.";
-            _bonesPanel.AddChild(cloneBoneBtn);
+            //// clone bone button
+            //var cloneBoneBtn = new Button("Clone", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.4f, -1f));
+            //cloneBoneBtn.OnClick = CloneSelectedBoneBtn;
+            //cloneBoneBtn.ToolTipText = "Clone selected bone with all its children. This will add the cloned bones to all animations, but won't clone the per-animation transformations.";
+            //_bonesPanel.AddChild(cloneBoneBtn);
 
             // bone alias input
             _bonesPanel.AddChild(new Paragraph("Alias:", Anchor.AutoInline, new Vector2(0.3f, -1f)));
@@ -472,7 +493,7 @@ namespace MonoSkelly.Editor
             // create per-animation-step panel
             _animationStepPropsPanel = new Panel(new Vector2(0, 500), PanelSkin.None, Anchor.Auto);
             _animationStepPropsPanel.Padding = Vector2.Zero;
-            _animationStepPropsPanel.ExtraMargin = Point.Zero;
+            _animationStepPropsPanel.ExtraMargin = Microsoft.Xna.Framework.Point.Zero;
             _animationsPanel.AddChild(_animationStepPropsPanel);
 
             // create duration input
@@ -1524,7 +1545,7 @@ Editor version: {{L_GREEN}}1.0.0{{DEFAULT}}.", size: new Vector2(600, 400));
         /// <summary>
         /// Pressed top menu exit.
         /// </summary>
-        void PressedTopMenu_Exit(GeonBit.UI.Utils.MenuBar.MenuCallbackContext context)
+        void PressedTopMenu_Exit(object sender, RoutedEventArgs e)
         {
             ConfirmAndExit();
         }
@@ -1543,7 +1564,7 @@ Editor version: {{L_GREEN}}1.0.0{{DEFAULT}}.", size: new Vector2(600, 400));
         /// <summary>
         /// Pressed top menu new.
         /// </summary>
-        void PressedTopMenu_New(GeonBit.UI.Utils.MenuBar.MenuCallbackContext context)
+        void PressedTopMenu_New(object sender, RoutedEventArgs e)
         {
             GeonBit.UI.Utils.MessageBox.ShowYesNoMsgBox("Discard Changes?", "Are you sure you wish to create a new skeleton and discard any unsaved changes?", () => { CreateEmptySkeleton(); return true; }, null);
         }
@@ -1551,7 +1572,7 @@ Editor version: {{L_GREEN}}1.0.0{{DEFAULT}}.", size: new Vector2(600, 400));
         /// <summary>
         /// Pressed top menu save-as.
         /// </summary>
-        void PressedTopMenu_SaveAs(GeonBit.UI.Utils.MenuBar.MenuCallbackContext context)
+        void PressedTopMenu_SaveAs(object sender, RoutedEventArgs e)
         {
             AskForNewSaveNameAndSave();
         }
@@ -1559,7 +1580,7 @@ Editor version: {{L_GREEN}}1.0.0{{DEFAULT}}.", size: new Vector2(600, 400));
         /// <summary>
         /// Pressed top menu save.
         /// </summary>
-        void PressedTopMenu_Save(GeonBit.UI.Utils.MenuBar.MenuCallbackContext context)
+        void PressedTopMenu_Save(object sender, RoutedEventArgs e)
         {
             // existing save
             if (_currentFilename != null)
@@ -1645,35 +1666,33 @@ Editor version: {{L_GREEN}}1.0.0{{DEFAULT}}.", size: new Vector2(600, 400));
             _currentFilename = newFilename;
         }
 
-        /// <summary>
-        /// Pressed top menu save level.
-        /// </summary>
-        void PressedTopMenu_Load(GeonBit.UI.Utils.MenuBar.MenuCallbackContext context)
-        {
-            // get files list
-            var files = System.IO.Directory.GetFiles(_savesFolder);
-            var filesList = new SelectList();
-            foreach (var file in files)
-            {
-                if (file.ToLower().EndsWith(".ini")) { filesList.AddItem(System.IO.Path.GetFileName(file)); }
-            }
+		/// <summary>
+		/// Pressed top menu save level.
+		/// </summary>
+		/// <summary>
+		/// Pressed top menu save level.
+		/// </summary>
+		void PressedTopMenu_Load(object sender, RoutedEventArgs e)
+		{
+			// Create and show the LoadFileWindow
+			var loadFileWindow = new LoadFileWindow();
+			loadFileWindow.Owner = _mainWindow;
+			if(loadFileWindow.ShowDialog() == true)
+			{
+				// Get the selected file from the dropdown
+				var selectedFile = loadFileWindow.FileDropdown.SelectedItem as ComboBoxItem;
+				if(selectedFile != null)
+				{
+					var loadFile = selectedFile.Content.ToString();
+					LoadProject(loadFile);
+				}
+			}
+		}
 
-            // show open dialog
-            GeonBit.UI.Utils.MessageBox.ShowMsgBox("Load File", "Select file to open:",
-                new GeonBit.UI.Utils.MessageBox.MsgBoxOption[] {
-                        new GeonBit.UI.Utils.MessageBox.MsgBoxOption("Load", () =>
-                        {
-                            var loadFile = filesList.SelectedValue;
-                            if (loadFile != null)
-                            {
-                                LoadProject(loadFile);
-                                return true;
-                            }
-                            return false;
-                        }),
-                        new GeonBit.UI.Utils.MessageBox.MsgBoxOption("Cancel", () => { return true; }),
-                }, new Entity[] { filesList });
-        }
+		private void LoadFileWindow_StateChanged(object sender, EventArgs e)
+		{
+			throw new NotImplementedException();
+		}
 
 		public void CallProtectedLoadContent()
 		{

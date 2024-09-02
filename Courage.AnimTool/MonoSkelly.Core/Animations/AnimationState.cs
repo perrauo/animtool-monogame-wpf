@@ -12,8 +12,10 @@ namespace MonoSkelly.Core
     /// </summary>
     public struct AnimationState
     {
-        // skeleton and animation prototype
-        Skeleton _skeleton;
+        public static implicit operator bool(in AnimationState anim) { return anim._animation != null;  }
+
+		// skeleton and animation prototype
+		Skeleton _skeleton;
         Animation _animation;
 
         // current animation step

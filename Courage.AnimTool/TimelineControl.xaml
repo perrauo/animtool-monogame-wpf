@@ -5,8 +5,29 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d"
       d:DesignHeight="100" d:DesignWidth="800">
-	<!-- Tickmark Timeline -->
-	<Canvas x:Name="TimelineCanvas" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightGray" Width="800" Height="64">
+	<!-- Define Grid Columns -->
+	<Grid.ColumnDefinitions>
+		<ColumnDefinition Width="Auto"/>
+		<ColumnDefinition Width="*"/>
+		<ColumnDefinition Width="Auto"/>
+	</Grid.ColumnDefinitions>
+
+	<!-- Controls on the Left -->
+	<StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10" Grid.Column="0">
+		<TextBlock Text="Framerate:" VerticalAlignment="Center" Margin="5"/>
+		<TextBox x:Name="FramerateTextBox" Width="50" Text="24" Margin="5"/>
+		<TextBlock Text="Frames:" VerticalAlignment="Center" Margin="5"/>
+		<TextBox x:Name="FramesTextBox" Width="50" Text="100" Margin="5"/>
+		<TextBlock Text="Selected Animation:" VerticalAlignment="Center" Margin="5"/>
+		<ComboBox x:Name="AnimationSelector" Width="150" Margin="5">
+			<!--<ComboBoxItem Content="Animation 1"/>
+            <ComboBoxItem Content="Animation 2"/>
+            <ComboBoxItem Content="Animation 3"/>-->
+		</ComboBox>
+	</StackPanel>
+
+	<!-- Tickmark Timeline in the Center -->
+	<Canvas x:Name="TimelineCanvas" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightGray" Width="800" Height="64" Grid.Column="1">
 		<!-- Timeline Background and Tick Marks Container -->
 		<Grid>
 			<!-- Timeline Background -->
@@ -39,11 +60,14 @@
 		<!-- Playhead -->
 		<Line x:Name="Playhead" X1="0" Y1="0" X2="0" Y2="{Binding ActualHeight, ElementName=TimelineCanvas}" Stroke="Red" StrokeThickness="2" VerticalAlignment="Center" Width="{Binding ActualWidth, ElementName=TimelineCanvas}" Height="{Binding ActualHeight, ElementName=TimelineCanvas}" Canvas.Top="15" Canvas.Left="20" />
 	</Canvas>
-	<!-- Controls -->
-	<StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10">
-		<TextBlock Text="Framerate:" VerticalAlignment="Center" Margin="5"/>
-		<TextBox x:Name="FramerateTextBox" Width="50" Text="24" Margin="5"/>
-		<TextBlock Text="Frames:" VerticalAlignment="Center" Margin="5"/>
-		<TextBox x:Name="FramesTextBox" Width="50" Text="100" Margin="5"/>
+
+	<!-- Playback Controls on the Right -->
+	<StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10" Grid.Column="2">
+		<Button Content="⏮️" Click="RewindButton_Click" Margin="5"/>
+		<Button Content="⏪" Click="StepBackwardButton_Click" Margin="5"/>
+		<Button x:Name="PlayPauseButton" Content="▶️" Click="PlayPauseButton_Click" Margin="5"/>
+		<Button Content="⏩" Click="StepForwardButton_Click" Margin="5"/>
+		<Button Content="⏭️" Click="FastForwardButton_Click" Margin="5"/>
+		<Button x:Name="RepeatButton" Content="🔁" Click="RepeatButton_Click" Margin="5"/>
 	</StackPanel>
 </Grid>

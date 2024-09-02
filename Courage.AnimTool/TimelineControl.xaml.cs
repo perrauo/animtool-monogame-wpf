@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+
+using MonoSkelly.Core;
+
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,12 +14,55 @@ namespace Courage.AnimTool
 	public partial class TimelineControl : Grid
 	{
 		private double _framerate;
+		public double Framerate
+		{
+			get => _framerate;
+			set
+			{
+				_framerate = value;
+			}
+		}
+
 		private int _frames;
-		private double _playheadPosition;
+		public int Frames
+		{
+			get => _frames;
+			set
+			{
+				FramesTextBox.Text = value.ToString();
+				UpdateTimeline();
+			}
+		}
+
+		private bool _isPlaying;
+		public bool IsPlaying => _isPlaying;
+
+		private bool _isRepeating;
+		public bool IsRepeating => _isRepeating;
+
+		private Skeleton _skeleton;
+
+		public Action<float> OnPlaybackFrame;
+
+		public Action<string> OnAnimationSelected;
+
+		private double _currentFrame; // Use this field to track the current frame
+
+		public double CurrentFrame
+		{
+			get => _currentFrame;
+			set
+			{
+				_currentFrame = value;
+				UpdatePlayheadPosition();
+			}
+		}
 
 		public TimelineControl()
 		{
 			InitializeComponent();
+
+			AnimationSelector.SelectionChanged += OnAnimationSelectionChanged;
 			FramerateTextBox.TextChanged += FramerateTextBox_TextChanged;
 			FramesTextBox.TextChanged += FramesTextBox_TextChanged;
 			TimelineCanvas.MouseLeftButtonDown += TimelineCanvas_MouseLeftButtonDown;
@@ -28,6 +75,61 @@ namespace Courage.AnimTool
 
 			// Update the timeline with the initial values
 			UpdateTimeline();
+		}
+
+		public void Update(GameTime gameTime)
+		{
+			if(_isPlaying)
+			{
+				double deltaTime = gameTime.ElapsedGameTime.TotalSeconds;
+				CurrentFrame += _framerate * deltaTime;
+
+				if(CurrentFrame >= _frames)
+				{
+					if(_isRepeating)
+					{
+						CurrentFrame = 0;
+						OnPlaybackFrame.Invoke(0f);
+					}
+					else
+					{
+						CurrentFrame = 0; // Reset the current frame
+						Pause(); // Pause the animation
+					}
+				}
+			}
+		}
+
+		private void Play()
+		{
+			_isPlaying = true;
+			PlayPauseButton.Content = "⏸️";
+		}
+
+		private void Pause()
+		{
+			_isPlaying = false;
+			PlayPauseButton.Content = "▶️";
+		}
+
+		public void LoadProject(Skeleton skeleton)
+		{
+			_skeleton = skeleton;
+		}
+
+		public void OnAnimationChanged(in AnimationState animation)
+		{
+			Frames = animation.StepsCount;
+		}
+
+		void OnAnimationSelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			ComboBoxItem item = (ComboBoxItem)AnimationSelector.SelectedValue;
+			string anim = (string)item.Content;
+			if(!string.IsNullOrEmpty(anim))
+			{
+				OnAnimationSelected.Invoke(anim);
+			}
 		}
 
 		private void FramerateTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -60,7 +162,7 @@ namespace Courage.AnimTool
 		{
 			if(e.LeftButton == MouseButtonState.Pressed)
 			{
-				MovePlayhead(e.GetPosition(TimelineCanvas).X);
+				MovePlayheadToPosition(e.GetPosition(TimelineCanvas).X);
 			}
 		}
 
@@ -68,8 +170,26 @@ namespace Courage.AnimTool
 		{
 			if(e.LeftButton == MouseButtonState.Pressed)
 			{
-				MovePlayhead(e.GetPosition(TimelineCanvas).X);
+				MovePlayheadToPosition(e.GetPosition(TimelineCanvas).X);
 			}
+		}
+
+		private void MovePlayheadToPosition(double position)
+		{
+			// Calculate the new current frame based on the mouse position
+			double newFrame = (position / TimelineCanvas.ActualWidth) * _frames;
+
+			// Ensure the current frame stays within the bounds of the timeline
+			newFrame = Math.Max(0, Math.Min(_frames, newFrame));
+
+			double delta = _currentFrame - newFrame;
+
+			_currentFrame = newFrame;
+
+			Playhead.X1 = (_currentFrame / _frames) * TimelineCanvas.ActualWidth;
+			Playhead.X2 = (_currentFrame / _frames) * TimelineCanvas.ActualWidth;
+
+			OnPlaybackFrame.Invoke((float)delta);
 		}
 
 		private void TimelineCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -77,11 +197,11 @@ namespace Courage.AnimTool
 			// Handle mouse button release if needed
 		}
 
-		private void MovePlayhead(double position)
+		private void UpdatePlayheadPosition()
 		{
-			_playheadPosition = position;
-			Playhead.X1 = _playheadPosition;
-			Playhead.X2 = _playheadPosition;
+			// Update the playhead position on the canvas based on the current frame
+			Playhead.X1 = (CurrentFrame / _frames) * TimelineCanvas.ActualWidth;
+			Playhead.X2 = (CurrentFrame / _frames) * TimelineCanvas.ActualWidth;
 		}
 
 		private void UpdateTimeline()
@@ -106,6 +226,56 @@ namespace Courage.AnimTool
 				framePanel.Children.Add(frameNumber);
 				FrameNumbers.Items.Add(framePanel); // Add the framePanel to the ItemsControl
 				Canvas.SetLeft(framePanel, position); // Set the position
+			}
+		}
+
+		private void RewindButton_Click(object sender, RoutedEventArgs e)
+		{
+			CurrentFrame = 0;
+		}
+
+		private void StepBackwardButton_Click(object sender, RoutedEventArgs e)
+		{
+			CurrentFrame = Math.Max(0, CurrentFrame - 1);
+		}
+
+		private void PlayPauseButton_Click(object sender, RoutedEventArgs e)
+		{
+			if(_isPlaying)
+			{
+				Pause();
+			}
+			else
+			{
+				Play();
+			}
+		}
+
+		private void StepForwardButton_Click(object sender, RoutedEventArgs e)
+		{
+			CurrentFrame = Math.Min(_frames, CurrentFrame + 1);
+		}
+
+		private void FastForwardButton_Click(object sender, RoutedEventArgs e)
+		{
+			CurrentFrame = _frames;
+		}
+
+		private void RepeatButton_Click(object sender, RoutedEventArgs e)
+		{
+			_isRepeating = !_isRepeating;
+			UpdateRepeatButtonAppearance();
+		}
+
+		private void UpdateRepeatButtonAppearance()
+		{
+			if(_isRepeating)
+			{
+				RepeatButton.Background = Brushes.LightBlue; // Change to your desired color
+			}
+			else
+			{
+				RepeatButton.Background = Brushes.Transparent;
 			}
 		}
 	}

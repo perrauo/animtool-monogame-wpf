@@ -24,6 +24,7 @@ using Image = GeonBit.UI.Entities.Image;
 using Assimp.Unmanaged;
 using Assimp;
 using Camera = MonoSkelly.Core.Camera;
+using MonoGame.Extended.Timers;
 //using static System.Net.Mime.MediaTypeNames;
 
 namespace MonoSkelly.Editor
@@ -122,27 +123,22 @@ namespace MonoSkelly.Editor
 
         private MainWindow _mainWindow;
 
+        private TimelineControl _timelineControl;
+
+        private AnimationState _animation;
+
+        private Dictionary<string, Model> _bodyParts;
+
 		/// <summary>
 		/// Create editor.
 		/// </summary>
 		public SkellyEditor(GraphicsDevice graphicsDevice)
         {
-            //_graphics = new GraphicsDeviceManager(this);
-            //_mainWindow = mainWindow;
             _graphicsDevice = graphicsDevice;
             Content.RootDirectory = "Content";
             IsMouseVisible = false;
         }
 
-
-
-		//private void OnMouseWheel(object sender, MouseWheelEventArgs e)
-		//{
-		//	// Update camera distance based on mouse wheel delta
-		//	_cameraDistance -= e.Delta / 120f * 10f;
-		//	if(_cameraDistance < 10) _cameraDistance = 10;
-		//	if(_cameraDistance > 500) _cameraDistance = 500;
-		//}
 
 		public void CallProtectedInitialize()
         {
@@ -157,383 +153,30 @@ namespace MonoSkelly.Editor
         protected override void Initialize()
         {
             _mainWindow = (MainWindow)Application.Current.MainWindow;
+			_mainWindow.MouseWheel += OnMouseWheel;
+			_mainWindow.NewMenuItem.Click += PressedTopMenu_New;
+			_mainWindow.SaveMenuItem.Click += PressedTopMenu_Save;
+			_mainWindow.SaveAsMenuItem.Click += PressedTopMenu_SaveAs;
+			_mainWindow.LoadMenuItem.Click += PressedTopMenu_Load;
+			_mainWindow.ExitMenuItem.Click += PressedTopMenu_Exit;
+
 			_animsPanel = _mainWindow.FindChild<AnimsPanel>();
             _bonesAndTransformsPanel = _mainWindow.FindChild<BonesAndTransformsPanel>();
-			_mainWindow.MouseWheel += OnMouseWheel;
+			
+            _timelineControl = _mainWindow.FindChild<TimelineControl>();
+            _timelineControl.OnPlaybackFrame += OnPlaybackFrame;
+			_timelineControl.OnAnimationSelected += OnAnimationChanged;
 
-
-			// set resolution and fullscreen
-			var windowBarHeight = 30;
-            //_graphics.SynchronizeWithVerticalRetrace = true;
-            //_graphics.PreferredBackBufferWidth = _graphics.GraphicsDevice.DisplayMode.Width;
-            //_graphics.PreferredBackBufferHeight = _graphics.GraphicsDevice.DisplayMode.Height - windowBarHeight;
-            //_graphics.IsFullScreen = false;
-            //_graphics.ApplyChanges();
-
-            // set window stuff
-            //Window.Title = "MonoSkelly - Editor";
-            //Window.IsBorderless = false;
-            //Window.AllowUserResizing = false;
-            //Window.Position = new Point(0, windowBarHeight);
-    
-            // init ui
-            InitUI();
-
-            // create skeleton and camera
-            _skeleton = new Skeleton();
+			// create skeleton and camera
+			_skeleton = new Skeleton();
             _camera = new Camera(_graphicsDevice);
             ResetCamera();
 
             // make sure saves folder exist
             if (!System.IO.Directory.Exists(_savesFolder)) { System.IO.Directory.CreateDirectory(_savesFolder); }
 
-            // call base init
-            base.Initialize();
-        }
-
-        /// <summary>
-        /// Initialize UI elements.
-        /// </summary>
-        void InitUI()
-        {
-            // init geonbit ui
-            //UserInterface.Initialize(Content, BuiltinThemes.editor);
-            //UserInterface.Active.GlobalScale = 0.85f;
-            //UserInterface.Active.ShowCursor = true;
-            IsMouseVisible = false;
-
-            // add main top menu
-            //var mainMenuLayout = new GeonBit.UI.Utils.MenuBar.MenuLayout();
-
-            // file menu
-            //mainMenuLayout.AddMenu("File", 220);
-            _mainWindow.NewMenuItem.Click += PressedTopMenu_New;
-			//mainMenuLayout.AddItemToMenu("File", "New Empty", PressedTopMenu_New);
-			_mainWindow.SaveMenuItem.Click += PressedTopMenu_Save;
-			//mainMenuLayout.AddItemToMenu("File", "Save", PressedTopMenu_Save);
-			_mainWindow.SaveAsMenuItem.Click += PressedTopMenu_SaveAs;
-			//mainMenuLayout.AddItemToMenu("File", "Save As", PressedTopMenu_SaveAs);
-			_mainWindow.LoadMenuItem.Click += PressedTopMenu_Load;
-            _mainWindow.ExitMenuItem.Click += PressedTopMenu_Exit;
-			//mainMenuLayout.AddItemToMenu("File", "Load", PressedTopMenu_Load);
-			//mainMenuLayout.AddItemToMenu("File", "Exit", PressedTopMenu_Exit);
-
-            // display menu
-            //mainMenuLayout.AddMenu("Display", 280);
-            //mainMenuLayout.AddItemToMenu("Display", "{{L_GREEN}}Show Handles", PressedTopMenu_ToggleShowHandlers);
-            //mainMenuLayout.AddItemToMenu("Display", "{{L_GREEN}}Show Bones", PressedTopMenu_ToggleShowBones);
-            //mainMenuLayout.AddItemToMenu("Display", "{{L_GREEN}}Bones Outline", PressedTopMenu_ToggleShowOutline);
-            //mainMenuLayout.AddItemToMenu("Display", "{{L_GREEN}}Enable Lighting", PressedTopMenu_ToggleLighting);
-            //mainMenuLayout.AddItemToMenu("Display", "Reset Camera", ResetCamera);
-
-            //// help menu
-            //mainMenuLayout.AddMenu("Help", 270);
-            //mainMenuLayout.AddItemToMenu("Help", "View Help", PressedTopMenu_ShowHelp);
-            //mainMenuLayout.AddItemToMenu("Help", "About MonoSkelly", PressedTopMenu_ShowAbout);
-
-            // create menus
-            //var mainMenuEntity = GeonBit.UI.Utils.MenuBar.Create(mainMenuLayout);
-            //mainMenuEntity.PriorityBonus = 1000000;
-            //UserInterface.Active.AddEntity(mainMenuEntity);
-
-            // create bones panel
-            //_bonesPanel = new Panel(new Vector2(440, 1050));
-            //_bonesPanel.Anchor = Anchor.TopLeft;
-            //_bonesPanel.Draggable = true;
-            //_bonesPanel.AddChild(new Header("Bones & Transformations"));
-            //_bonesPanel.AddChild(new HorizontalLine());
-            ////UserInterface.Active.AddEntity(_bonesPanel);
-
-            //// list to show bones
-            //_bonesPanel.AddChild(new Paragraph("Selected Bone:"));
-            //_bonesList = new SelectList();
-            //_bonesPanel.AddChild(_bonesList);
-
-            //// bone alias input
-            //_bonesPanel.AddChild(new Paragraph("Alias:", Anchor.AutoInline, new Vector2(0.3f, -1f)));
-            //_boneAlias = new TextInput(false, new Vector2(0.7f, 40), Anchor.AutoInline);
-            //_boneAlias.Value = "";
-            //_boneAlias.OnValueChange = BoneAliasChanged;
-            //_boneAlias.ToolTipText = "Attach an alias to this bone. You can later query this bone transformations using the alias instead of its full path.";
-            //_boneAlias.PlaceholderText = "";
-            //_bonesPanel.AddChild(_boneAlias);
-
-            //_bonesPanel.AddChild(new HorizontalLine());
-
-            //// show selected bone
-            //_selectedBoneDisplay = new Header("[Nothing Selected]", Anchor.BottomCenter);
-            //_selectedBoneDisplay.AlignToCenter = true;
-            //_selectedBoneDisplay.Size = new Vector2(0, -1);
-            ////UserInterface.Active.Root.AddChild(_selectedBoneDisplay);
-
-            //// rotation input
-            //_bonesPanel.AddChild(new Paragraph("Bone Rotation:"));
-            //float transInputHeight = 42;
-
-            //_boneRotateX = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneRotateX.Value = "0";
-            //_boneRotateX.Validators.Add(new TextValidatorNumbersOnly(true));
-            //_boneRotateX.OnValueChange = UpdateBoneTransform;
-            //_boneRotateX.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneRotateX);
-
-            //_boneRotateY = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneRotateY.Value = "0";
-            //_boneRotateY.Validators.Add(new TextValidatorNumbersOnly(true));
-            //_boneRotateY.OnValueChange = UpdateBoneTransform;
-            //_boneRotateY.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneRotateY);
-
-            //_boneRotateZ = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneRotateZ.Value = "0";
-            //_boneRotateZ.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneRotateZ.OnValueChange = UpdateBoneTransform;
-            //_boneRotateZ.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneRotateZ);
-
-            //// offset input
-            //_bonesPanel.AddChild(new Paragraph("Bone Offset:"));
-
-            //_boneOffsetX = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneOffsetX.Value = "0";
-            //_boneOffsetX.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneOffsetX.OnValueChange = UpdateBoneTransform;
-            //_boneOffsetX.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneOffsetX);
-
-            //_boneOffsetY = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneOffsetY.Value = "0";
-            //_boneOffsetY.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneOffsetY.OnValueChange = UpdateBoneTransform;
-            //_boneOffsetY.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneOffsetY);
-
-            //_boneOffsetZ = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneOffsetZ.Value = "0";
-            //_boneOffsetZ.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneOffsetZ.OnValueChange = UpdateBoneTransform;
-            //_boneOffsetZ.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneOffsetZ);
-
-            //// scale input
-            //_bonesPanel.AddChild(new Paragraph("Bone Scale:"));
-
-            //_boneScaleX = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneScaleX.Value = "1";
-            //_boneScaleX.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneScaleX.OnValueChange = UpdateBoneTransform;
-            //_boneScaleX.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneScaleX);
-
-            //_boneScaleY = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneScaleY.Value = "1";
-            //_boneScaleY.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneScaleY.OnValueChange = UpdateBoneTransform;
-            //_boneScaleY.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneScaleY);
-
-            //_boneScaleZ = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneScaleZ.Value = "1";
-            //_boneScaleZ.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneScaleZ.OnValueChange = UpdateBoneTransform;
-            //_boneScaleZ.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneScaleZ);
-
-            //_bonesPanel.AddChild(new Header("Debug Bone Rendering"));
-            //_bonesPanel.AddChild(new HorizontalLine());
-
-            //// set bone display
-            //var setBoneDisplay = new CheckBox("Render Bone In Editor");
-            //setBoneDisplay.OnValueChange = UpdateBoneMeshTransform;
-            //_bonesPanel.AddChild(setBoneDisplay);
-            //_boneMeshVisible = setBoneDisplay;
-
-            //// offset input
-            //_bonesPanel.AddChild(new Paragraph("Mesh Offset:"));
-
-            //_boneMeshOffsetX = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneMeshOffsetX.Value = "0";
-            //_boneMeshOffsetX.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneMeshOffsetX.OnValueChange = UpdateBoneMeshTransform;
-            //_boneMeshOffsetX.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneMeshOffsetX);
-
-            //_boneMeshOffsetY = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneMeshOffsetY.Value = "0";
-            //_boneMeshOffsetY.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneMeshOffsetY.OnValueChange = UpdateBoneMeshTransform;
-            //_boneMeshOffsetY.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneMeshOffsetY);
-
-            //_boneMeshOffsetZ = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneMeshOffsetZ.Value = "0";
-            //_boneMeshOffsetZ.Validators.Add(new TextValidatorNumbersOnly(true));
-            //_boneMeshOffsetZ.OnValueChange = UpdateBoneMeshTransform;
-            //_boneMeshOffsetZ.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneMeshOffsetZ);
-
-            //// scale input
-            //_bonesPanel.AddChild(new Paragraph("Mesh Scale:"));
-
-            //_boneMeshScaleX = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneMeshScaleX.Value = "1";
-            //_boneMeshScaleX.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneMeshScaleX.OnValueChange = UpdateBoneMeshTransform;
-            //_boneMeshScaleX.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneMeshScaleX);
-
-            //_boneMeshScaleY = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneMeshScaleY.Value = "1";
-            //_boneMeshScaleY.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneMeshScaleY.OnValueChange = UpdateBoneMeshTransform;
-            //_boneMeshScaleY.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneMeshScaleY);
-
-            //_boneMeshScaleZ = new TextInput(false, new Vector2(0.33f, transInputHeight), Anchor.AutoInline);
-            //_boneMeshScaleZ.Value = "1";
-            //_boneMeshScaleZ.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_boneMeshScaleZ.OnValueChange = UpdateBoneMeshTransform;
-            //_boneMeshScaleZ.WhileMouseDown = StartDraggingValue;
-            //_bonesPanel.AddChild(_boneMeshScaleZ);
-
-            //// create animations panel
-            //_animationsPanel = new Panel(new Vector2(440, 925));
-            //_animationsPanel.Anchor = Anchor.TopRight;
-            //_animationsPanel.Draggable = true;
-            //_animationsPanel.AddChild(new Header("Animations"));
-            //_animationsPanel.AddChild(new HorizontalLine());
-            ////UserInterface.Active.AddEntity(_animationsPanel);
-
-            //// animation selection
-            //_animationsPanel.AddChild(new Paragraph("Select Animation To Edit:"));
-            //_animationSelection = new DropDown();
-            //_animationSelection.AddItem(DefaultNoneAnimationName);
-            //_animationsPanel.AddChild(_animationSelection);
-
-            //// add animation button
-            //var newAnimationBtn = new Button("New", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.27f, -1f));
-            //newAnimationBtn.OnClick = CreateAnimationBtn;
-            //newAnimationBtn.ToolTipText = "Create a new animation sequence.";
-            //_animationsPanel.AddChild(newAnimationBtn);
-            
-            //// clone animation button
-            //var cloneAnimationBtn = new Button("Clone", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.34f, -1f));
-            //cloneAnimationBtn.OnClick = CloneAnimationBtn;
-            //cloneAnimationBtn.ToolTipText = "Clone selected animation.";
-            //_animationsPanel.AddChild(cloneAnimationBtn);
-
-            //// delete animation button
-            //var deleteAnimationBtn = new Button("Delete", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.39f, -1f));
-            //deleteAnimationBtn.OnClick = DeleteAnimationBtn;
-            //deleteAnimationBtn.ToolTipText = "Delete selected animation.";
-            //_animationsPanel.AddChild(deleteAnimationBtn);
-
-            //// step selection
-            //_animationsPanel.AddChild(new Paragraph("Select Animation Step:"));
-            //_animationStepSelection = new DropDown();
-            //_animationStepSelection.OnValueChange = SelectAnimationStep;
-            //_animationsPanel.AddChild(_animationStepSelection);
-            
-            //// add step button
-            //var newStepBtn = new Button("New", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.27f, -1f));
-            //newStepBtn.OnClick = CreateAnimationStepBtn;
-            //newStepBtn.ToolTipText = "Create a new animation step at the end of currently selected step.";
-            //_animationsPanel.AddChild(newStepBtn);
-
-            //// split step button
-            //var splitStepBtn = new Button("Split", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.36f, -1f));
-            //splitStepBtn.OnClick = SplitAnimationBtn;
-            //splitStepBtn.ToolTipText = "Split the currently selected step into two steps, at the position the timeline is currently set on.";
-            //_animationsPanel.AddChild(splitStepBtn);
-
-            //// delete step button
-            //var deleteStepBtn = new Button("Delete", ButtonSkin.Default, Anchor.AutoInline, new Vector2(0.37f, -1f));
-            //deleteStepBtn.OnClick = DeleteAnimationStepBtn;
-            //splitStepBtn.ToolTipText = "Delete current animation step.";
-            //_animationsPanel.AddChild(deleteStepBtn);
-
-            //// animation properties seperator
-            //_animationsPanel.AddChild(new HorizontalLine());
-
-            //// animation timeline
-            //_animationsPanel.AddChild(new Paragraph("Animation Timeline:"));
-            //_animationTimeline = new TimelineElement();
-            //_animationTimeline.ToolTipText = "Display the animation steps over the entire animation duration. Click on this timeline to jump to a specific time position. Note: you can't edit transformations while not pointing on a step keyframe.";
-            //_animationsPanel.AddChild(_animationTimeline);
-            //_animationTimelineCaption = new RichParagraph();
-            //_animationsPanel.AddChild(_animationTimelineCaption);
-            //_animationTimeline.OnValueChange = TimelineChangeValue;
-
-            //// play button
-            //_animationPlayBtn = new Image(Content.Load<Texture2D>("Editor/play_btn"), new Vector2(32, 32), ImageDrawMode.Stretch, Anchor.AutoInline);
-            //_animationPlayBtn.SourceRectangle = new Rectangle(0, 0, 24, 24);
-            //_animationPlayBtn.Offset = new Vector2(-60, -32);
-            //_animationPlayBtn.ToolTipText = "Start / stop playing animation.";
-            //_animationPlayBtn.OnClick = (Entity entity) =>
-            //{
-            //    _playAnimation = !_playAnimation;
-            //    _animationPlayBtn.SourceRectangle = new Rectangle(_playAnimation ? 24 : 0, 0, 24, 24);
-            //};
-            //_animationsPanel.AddChild(_animationPlayBtn);
-
-            //// animation repeats
-            //_animationRepeats = new CheckBox("Repeating Animation");
-            //_animationRepeats.ToolTipText = "Repeating animations iterpolate back to step 0 when reaching the final step. Non-repeating will stop instead.";
-            //_animationRepeats.OnValueChange = ToggledAnimationRepeats;
-            //_animationsPanel.AddChild(_animationRepeats);
-
-            //// create per-animation-step panel
-            //_animationStepPropsPanel = new Panel(new Vector2(0, 500), PanelSkin.None, Anchor.Auto);
-            //_animationStepPropsPanel.Padding = Vector2.Zero;
-            //_animationStepPropsPanel.ExtraMargin = Microsoft.Xna.Framework.Point.Zero;
-            //_animationsPanel.AddChild(_animationStepPropsPanel);
-
-            //// create duration input
-            //_animationStepPropsPanel.AddChild(new HorizontalLine());
-            //_animationStepPropsPanel.AddChild(new Paragraph("Step Duration:", Anchor.AutoInline, new Vector2(0.52f, -1f)));
-            //_animationStepDuration = new TextInput(false, new Vector2(0.48f, transInputHeight + 2), Anchor.AutoInline);
-            //_animationStepDuration.Value = "1";
-            //_animationStepDuration.Validators.Add(new GeonBit.UI.Entities.TextValidators.TextValidatorNumbersOnly(true));
-            //_animationStepDuration.OnValueChange = StepDurationChanged;
-            //_animationStepDuration.WhileMouseDown = StartDraggingValue;
-            //_animationStepDuration.ToolTipText = "Current step duration, in seconds (duration = time to lerp transformations to next step).";
-            //_animationStepPropsPanel.AddChild(_animationStepDuration);
-
-            //// create animation name input
-            //_animationStepPropsPanel.AddChild(new Paragraph("Step Name:", Anchor.AutoInline, new Vector2(0.4f, -1f)));
-            //_animationStepNameInput = new TextInput(false, new Vector2(0.6f, transInputHeight + 2), Anchor.AutoInline);
-            //_animationStepNameInput.Value = "";
-            //_animationStepNameInput.OnValueChange = StepNameChanged;
-            //_animationStepNameInput.ToolTipText = "Step name / identifier. Used for the steps selection dropdown, and can be queried via API when animating the skeleton. You can use this field to tag important animation steps, for example the point to deliver an attack animation damage.";
-            //_animationStepNameInput.PlaceholderText = "[Unnamed Step]";
-            //_animationStepPropsPanel.AddChild(_animationStepNameInput);
-
-            //// create animation step movement and scale interpolation
-            //_animationStepPropsPanel.AddChild(new Paragraph("Move & Scale Interpolation:"));
-            //_animationStepMoveAndScaleInterpolation = new DropDown(new Vector2(0f, 140f));
-            //_animationStepMoveAndScaleInterpolation.AddItem(InterpolationTypes.Linear.ToString());
-            //_animationStepMoveAndScaleInterpolation.AddItem(InterpolationTypes.SmoothDamp.ToString());
-            //_animationStepMoveAndScaleInterpolation.AddItem(InterpolationTypes.SmoothStep.ToString());
-            //_animationStepMoveAndScaleInterpolation.ToolTipText = "Method to use when interpolating scale and offset vectors.";
-            //_animationStepMoveAndScaleInterpolation.OnValueChange = ChangeStepInterpolation;
-            //_animationStepPropsPanel.AddChild(_animationStepMoveAndScaleInterpolation);
-
-            //// create animation step rotation interpolation
-            //_animationStepPropsPanel.AddChild(new Paragraph("Rotation Interpolation:"));
-            //_animationStepRotateInterpolation = new DropDown(new Vector2(0f, 140f));
-            //_animationStepRotateInterpolation.AddItem(InterpolationTypes.Linear.ToString());
-            //_animationStepRotateInterpolation.AddItem(InterpolationTypes.SmoothDamp.ToString());
-            //_animationStepRotateInterpolation.AddItem(InterpolationTypes.SphericalLinear.ToString());
-            //_animationStepRotateInterpolation.ToolTipText = "Method to use when interpolating rotation.";
-            //_animationStepRotateInterpolation.OnValueChange = ChangeStepInterpolation;
-            //_animationStepPropsPanel.AddChild(_animationStepRotateInterpolation);
-
-            //// select default animation
-            //_animationStepMoveAndScaleInterpolation.SelectedIndex = 0;
-            //_animationStepRotateInterpolation.SelectedIndex = 0;
-            //_animationTimeline.OnValueChange(_animationTimeline);
-            //_animationSelection.OnValueChange = AnimationSelected;
-            //_animationSelection.SelectedIndex = 0;
+			// call base init
+			base.Initialize();
         }
 
         /// <summary>
@@ -543,6 +186,30 @@ namespace MonoSkelly.Editor
         {
             _skeleton.SetAlias(_selectedBone, _boneAlias.Value);
         }
+
+        void OnAnimationChanged(string animation)
+        {
+            _animation = _skeleton.BeginAnimation(animation);
+            _timelineControl.OnAnimationChanged(_animation);
+		}
+
+        void OnPlaybackFrame(float delta)
+        {
+            _animation.Update(delta);
+
+
+			//var playerWorldMatrix = Matrix.Identity;
+
+            // TODO
+			// now draw the player models
+			//foreach(var part in _playerParts)
+			//{
+			//	var bone = _animation.GetBoneTransform(part.Key);
+			//	part.Value.Draw(bone * playerWorldMatrix, _camera.View, _camera.Projection);
+			//}
+
+			//base.Draw(delta);
+		}
 
         /// <summary>
         /// Set animation to repeat / not repeat.
@@ -779,6 +446,7 @@ namespace MonoSkelly.Editor
                 animation.RemoveStep(_animationStepSelection.SelectedIndex);
                 UpdatePartsList(_selectedBone);
                 _animationSelection.SelectedValue = selectedAnimation;
+                //SelectedAnimation
                 return true;
             },
             () => { return true; });
@@ -863,7 +531,10 @@ namespace MonoSkelly.Editor
             if (_animationSelection.SelectedValue == null || _animationSelection.SelectedValue == DefaultNoneAnimationName) { return; }
 
             // not playing animation anymore
-            if (_playAnimation) { _animationPlayBtn.OnClick(_animationPlayBtn); }
+            //if (_playAnimation) 
+            //{ 
+            //    _animationPlayBtn.OnClick(_animationPlayBtn); 
+            //}
 
             // get animation steps
             var animation = _skeleton.GetAnimation(_animationSelection.SelectedValue);
@@ -1177,12 +848,14 @@ namespace MonoSkelly.Editor
             // load skeleton
             _skeleton = new Skeleton();
             _skeleton.LoadFrom(new Sini.IniFile(System.IO.Path.Combine(_savesFolder, file)));
+			_timelineControl.LoadProject(_skeleton);
 
-            // update parts list
-            UpdatePartsList();
+			// update parts list
+			UpdatePartsList();
 
             // set filename
             UpdateFilename(file);
+
         }
 
         /// <summary>
@@ -1377,48 +1050,54 @@ namespace MonoSkelly.Editor
                 _bonesAndTransformsPanel.BonesListBox.Items.Add(listBoxItem);
 			}
 
-			// set callback
-			//_bonesList.OnValueChange = (Entity entity) =>
-			//{
-			//	UpdateTransformationsFromSkeleton();
-			//};
+            // set callback
+            //_bonesList.OnValueChange = (Entity entity) =>
+            //{
+            //	UpdateTransformationsFromSkeleton();
+            //};
 
-			// select default animation
-			//_animationSelection.SelectedIndex = 0;
+            // select default animation
+            //_animationSelection.SelectedIndex = 0;
 
-			// select default bone
-			//if(_bonesList.Items.Length > 0)
-			//{
-			//	// select specific bone
-			//	if(selectedBone != null)
-			//	{
-			//		for(var i = 0; i < bones.Length; ++i)
-			//		{
-			//			if(selectedBone == bones[i].Item2)
-			//			{
-			//				_bonesList.SelectedIndex = i;
-			//				break;
-			//			}
-			//		}
-			//	}
-			//	// select default root
-			//	else
-			//	{
-			//		_bonesList.SelectedIndex = 0;
-			//	}
-			//}
+            // select default bone
+            //if(_bonesList.Items.Length > 0)
+            //{
+            //	// select specific bone
+            //	if(selectedBone != null)
+            //	{
+            //		for(var i = 0; i < bones.Length; ++i)
+            //		{
+            //			if(selectedBone == bones[i].Item2)
+            //			{
+            //				_bonesList.SelectedIndex = i;
+            //				break;
+            //			}
+            //		}
+            //	}
+            //	// select default root
+            //	else
+            //	{
+            //		_bonesList.SelectedIndex = 0;
+            //	}
+            //}
 
-			// reset animations
-			//_animationSelection.ClearItems();
-			//_animationSelection.AddItem(DefaultNoneAnimationName);
-			//foreach(var animation in _skeleton.Animations.OrderBy(x => x))
-			//{
-			//	_animationSelection.AddItem(animation);
-			//}
-			//_animationSelection.SelectedIndex = 0;
+            // reset animations
+            //_animsPanel.
+            //_animsPanel.i
 
-			// unfreeze updates
-			_freezeMeshUpdates = false;
+            _timelineControl.AnimationSelector.Items.Clear();
+            foreach(var animation in _skeleton.Animations.OrderBy(x => x))
+            {
+				var listBoxItem = new ComboBoxItem
+				{
+					Content = animation
+				};
+                _timelineControl.AnimationSelector.Items.Add(listBoxItem);
+			}
+			_timelineControl.AnimationSelector.SelectedIndex = 0;
+
+            // unfreeze updates
+            _freezeMeshUpdates = false;
 		}	
 
 		/// <summary>
@@ -1427,39 +1106,7 @@ namespace MonoSkelly.Editor
 		void UpdateTransformationsFromSkeleton()
         {
             _freezeMeshUpdates = true;
-
-            // select bone
-            //_selectedBone = _bonesIndexToPath[_bonesList.SelectedIndex].Item2;
-
-            // get animation and step
-            //var animation = SelectedAnimation;
-            //var stepIndex = _animationStepSelection.SelectedIndex;
-
-            // update rotation and offset
-            //var trans = _skeleton.GetTransform(_selectedBone, animation, stepIndex);
-            //_boneRotateX.Value = trans.Rotation.X.ToString();
-            //_boneRotateY.Value = trans.Rotation.Y.ToString();
-            //_boneRotateZ.Value = trans.Rotation.Z.ToString();
-            //_boneOffsetX.Value = trans.Offset.X.ToString();
-            //_boneOffsetY.Value = trans.Offset.Y.ToString();
-            //_boneOffsetZ.Value = trans.Offset.Z.ToString();
-            //_boneScaleX.Value = trans.Scale.X.ToString();
-            //_boneScaleY.Value = trans.Scale.Y.ToString();
-            //_boneScaleZ.Value = trans.Scale.Z.ToString();
-
-            // update alias
-            //_boneAlias.Value = _skeleton.GetBoneAlias(_selectedBone) ?? string.Empty;
-
-            // update mesh display
-            //_boneMeshVisible.Checked = _skeleton.HavePreviewModel(_selectedBone);
             var meshTrans = _skeleton.GetPreviewModelTransform(_selectedBone);
-            //_boneMeshOffsetX.Value = meshTrans.Offset.X.ToString();
-            //_boneMeshOffsetY.Value = meshTrans.Offset.Y.ToString();
-            //_boneMeshOffsetZ.Value = meshTrans.Offset.Z.ToString();
-            //_boneMeshScaleX.Value = meshTrans.Scale.X.ToString();
-            //_boneMeshScaleY.Value = meshTrans.Scale.Y.ToString();
-            //_boneMeshScaleZ.Value = meshTrans.Scale.Z.ToString();
-
             _freezeMeshUpdates = false;
         }
 
@@ -1756,23 +1403,23 @@ namespace MonoSkelly.Editor
 			}
 
 			// play animation
-			if(_playAnimation)
-			{
-				// play animation
-				_timeForNextAdvanceStep -= gameTime.ElapsedGameTime.TotalMilliseconds;
-				if(_timeForNextAdvanceStep <= 0)
-				{
-					_timeForNextAdvanceStep = 10;
-					_animationTimeline.TimePosition++;
-					if(_animationTimeline.TimePosition > _animationTimeline.MaxDuration) { _animationTimeline.TimePosition = 0; }
-				}
+			//if(_timelineControl.IsPlaying)
+			//{
+			//	// play animation
+			//	_timeForNextAdvanceStep -= gameTime.ElapsedGameTime.TotalMilliseconds;
+			//	if(_timeForNextAdvanceStep <= 0)
+			//	{
+			//		_timeForNextAdvanceStep = 10;
+			//		_animationTimeline.TimePosition++;
+			//		if(_animationTimeline.TimePosition > _animationTimeline.MaxDuration) { _animationTimeline.TimePosition = 0; }
+			//	}
 
-				// disable if default pose or no steps
-				if(_animationSelection.SelectedIndex <= 0 || _animationTimeline.MaxDuration <= 0)
-				{
-					_animationPlayBtn.OnClick(_animationPlayBtn);
-				}
-			}
+			//	// disable if default pose or no steps
+			//	if(_animationSelection.SelectedIndex <= 0 || _animationTimeline.MaxDuration <= 0)
+			//	{
+			//		_animationPlayBtn.OnClick(_animationPlayBtn);
+			//	}
+			//}
 
 			// enable / disable bones panel
 			//_bonesPanel.Enabled = !_playAnimation && (_animationSelection.SelectedIndex <= 0 || _animationTimeline.IsOnMark());
@@ -1953,26 +1600,26 @@ namespace MonoSkelly.Editor
             }
 
             // get animation and offset
-            //var animationId = SelectedAnimation;
-            //var animationOffset = AnimationOffset;
-            float animationOffset = 0;
-            var animationId = "";
+            string animationId = _animation ? _animation.Name : ""; 
+            float animationOffset = (float)( _timelineControl.CurrentFrame / _timelineControl.Frames);
 
-			// draw bones
-			if (_showBones)
-            {
-                _skeleton.DebugDrawBones(_camera.View, _camera.Projection, Matrix.Identity, animationId, animationOffset, _showBonesOutline, _selectedBone, _showLights);
-            }
+            // Update the timeline which will in turn call OnPlaybackFrame
+            _timelineControl.Update(gameTime);
 
-            // draw bone handles
-            if (_showBoneHandles)
-            {
-                _skeleton.DebugDrawBoneHandles(_camera.View, _camera.Projection, Matrix.Identity, animationId, animationOffset, 0.2f, Color.Teal, Color.Red, _selectedBone);
-            }
+			if(_showBones)
+			{
+				_skeleton.DebugDrawBones(_camera.View, _camera.Projection, Matrix.Identity, animationId, animationOffset, _showBonesOutline, _selectedBone, _showLights);
+			}
 
-            // draw ui and call base draw
-            //UserInterface.Active.Draw(_spriteBatch);
-            base.Draw(gameTime);
+			// draw bone handles
+			if(_showBoneHandles)
+			{
+				_skeleton.DebugDrawBoneHandles(_camera.View, _camera.Projection, Matrix.Identity, animationId, animationOffset, 0.2f, Color.Teal, Color.Red, _selectedBone);
+			}
+
+			// draw ui and call base draw
+			//UserInterface.Active.Draw(_spriteBatch);
+			base.Draw(gameTime);
         }
     }
 }

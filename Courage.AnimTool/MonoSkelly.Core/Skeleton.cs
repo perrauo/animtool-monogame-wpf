@@ -23,7 +23,7 @@ namespace MonoSkelly.Core
         /// <summary>
         /// All the data we store for a bone.
         /// </summary>
-        class BonePreviewMesh
+        public class BonePreviewMesh
         {
             /// <summary>
             /// Bone debug mesh transformation.
@@ -37,7 +37,7 @@ namespace MonoSkelly.Core
         }
 
         // preview meshes data
-        Dictionary<string, BonePreviewMesh> _previewMeshesData = new Dictionary<string, BonePreviewMesh>();
+        public Dictionary<string, BonePreviewMesh> _previewMeshesData = new Dictionary<string, BonePreviewMesh>();
 
         // animations attached to this skeleton
         Dictionary<string, Animation> _animations = new Dictionary<string, Animation>();
@@ -54,7 +54,7 @@ namespace MonoSkelly.Core
 
         // model used to show bone handles and bones
         static Model _handleModel;
-        static Model _boneModel;
+        public static Model _boneModel;
         static Texture2D _boneTexture;
 
         // bone aliases

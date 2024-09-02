@@ -10,7 +10,7 @@
 	<Border BorderBrush="Black" BorderThickness="1" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=UserControl}}">
 		<Grid>
 			<StackPanel Margin="10,0,0,0">
-				<TextBlock Text="Animations:" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+				<TextBlock Text="Animations" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,5,0,0"/>
 				<Separator Margin="0,5,0,0"/>
 				<TextBlock Text="Select Animation To Edit:" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,5,0,0"/>
 				<ComboBox>

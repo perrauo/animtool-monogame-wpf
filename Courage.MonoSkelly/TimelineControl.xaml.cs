@@ -40,6 +40,9 @@ namespace Courage.MonoSkelly
 		private bool _isRepeating;
 		public bool IsRepeating => _isRepeating;
 
+		private bool _isUnfolded;
+		public bool IsUnfolded => _isUnfolded;
+
 		private Skeleton _skeleton;
 
 		public Action<float> OnPlaybackFrame;
@@ -64,6 +67,8 @@ namespace Courage.MonoSkelly
 
 			AnimationSelector.SelectionChanged += OnAnimationSelectionChanged;
 			FramerateTextBox.TextChanged += FramerateTextBox_TextChanged;
+			DisclosureToggleButton.Click += UpdateUnfoldButton;
+
 			FramesTextBox.TextChanged += FramesTextBox_TextChanged;
 			TimelineCanvas.MouseLeftButtonDown += TimelineCanvas_MouseLeftButtonDown;
 			TimelineCanvas.MouseMove += TimelineCanvas_MouseMove;
@@ -276,6 +281,20 @@ namespace Courage.MonoSkelly
 			else
 			{
 				RepeatButton.Background = Brushes.Transparent;
+			}
+		}
+
+		private void UpdateUnfoldButton(object sender, RoutedEventArgs e)
+		{
+			_isUnfolded = !_isUnfolded;
+			if(_isUnfolded)
+			{
+				DisclosureToggleButton.Content = "▼";
+				//RepeatButton.Background = Brushes.LightBlue; // Change to your desired color
+			}
+			else
+			{
+				DisclosureToggleButton.Content = "▶";
 			}
 		}
 	}

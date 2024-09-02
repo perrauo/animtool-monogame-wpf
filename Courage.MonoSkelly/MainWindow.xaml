@@ -45,6 +45,7 @@
 			</MenuItem>
 		</Menu>
 		<monoSkelly:TimelineControl x:Name="TimelineControl" Background="LightGray" DockPanel.Dock="Bottom" />
+		<monoSkelly:SplineEditor x:Name="SplineEditor" Background="LightGray" DockPanel.Dock="Bottom" />
 		<Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>

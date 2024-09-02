@@ -1,5 +1,5 @@
-[submodule "Courage.AnimTool/GeonBit.UI"]
-	path = Courage.AnimTool/GeonBit.UI
+[submodule "Courage.MonoSkelly/GeonBit.UI"]
+	path = Courage.MonoSkelly/GeonBit.UI
 	url = https://github.com/RonenNess/GeonBit.UI.git
 [submodule "External/MonoGame"]
 	path = MonoGame

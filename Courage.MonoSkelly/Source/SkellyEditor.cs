@@ -151,6 +151,7 @@ namespace MonoSkelly.Editor
 			_skeleton = new Skeleton();
 			_skeleton.LoadFrom(new Sini.IniFile(System.IO.Path.Combine(_savesFolder, file)));
 			_timelineControl.LoadProject(_skeleton);
+			// Load in the keyframes
 
 			// update parts list
 			UpdatePartsList();

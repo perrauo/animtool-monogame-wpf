@@ -9,6 +9,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
+using Rectangle = System.Windows.Shapes.Rectangle;
+
 namespace Courage.MonoSkelly
 {
 	public partial class TimelineControl : Grid
@@ -23,12 +25,13 @@ namespace Courage.MonoSkelly
 			}
 		}
 
-		private int _frames;
-		public int Frames
+		private double _frames;
+		public double Frames
 		{
 			get => _frames;
 			set
 			{
+				_frames = value;
 				FramesTextBox.Text = value.ToString();
 				UpdateTimeline();
 			}
@@ -48,6 +51,8 @@ namespace Courage.MonoSkelly
 		public Action<float> OnPlaybackFrame;
 
 		public Action<string> OnAnimationSelected;
+
+		private Animation _animation;
 
 		private double _currentFrame; // Use this field to track the current frame
 
@@ -122,9 +127,48 @@ namespace Courage.MonoSkelly
 			_skeleton = skeleton;
 		}
 
+		private void AddGreenBar(double timestamp)
+		{
+			double position = (timestamp / _frames) * TimelineCanvas.ActualWidth;
+			Rectangle greenBar = new Rectangle
+			{
+				Width = 2,
+				Height = TimelineCanvas.ActualHeight,
+				Fill = Brushes.Green,
+				VerticalAlignment = VerticalAlignment.Top,
+				HorizontalAlignment = HorizontalAlignment.Left
+			};
+			Canvas.SetLeft(greenBar, position);
+			TimelineCanvas.Children.Add(greenBar);
+		}
+
 		public void OnAnimationChanged(in AnimationState animation)
 		{
-			Frames = animation.StepsCount;
+			_animation = _skeleton.GetAnimation(animation.Name);
+			// 
+			double totalTimeInSecs = 0;
+			foreach(var step in _animation.Steps)
+			{
+				totalTimeInSecs += step.Duration;
+			}
+
+			Frames = Framerate * totalTimeInSecs;
+
+			// Remove existing green bars
+			for(int i = TimelineCanvas.Children.Count - 1; i >= 0; i--)
+			{
+				if(TimelineCanvas.Children[i] is Rectangle rect && rect.Fill == Brushes.Green)
+				{
+					TimelineCanvas.Children.RemoveAt(i);
+				}
+			}
+
+			totalTimeInSecs = 0;
+			foreach(var step in _animation.Steps)
+			{
+				totalTimeInSecs += step.Duration;
+				AddGreenBar(Framerate * totalTimeInSecs);
+			}
 		}
 
 		void OnAnimationSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -219,7 +263,9 @@ namespace Courage.MonoSkelly
 			}
 
 			// Update the timeline based on the framerate and number of frames
+			//FrameNumbers.
 			FrameNumbers.Items.Clear();
+			FrameNumbers.Items.Refresh();
 			double tickSpacing = TimelineCanvas.ActualWidth / _frames; // Adjusted calculation
 			for(int i = 0; i <= _frames; i++)
 			{

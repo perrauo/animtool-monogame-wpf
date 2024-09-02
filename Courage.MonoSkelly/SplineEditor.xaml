@@ -37,10 +37,19 @@
 	<Grid Grid.Row="1" x:Name="MainContent" Visibility="{Binding IsChecked, ElementName=DisclosureToggleButton, Converter={StaticResource BooleanToVisibilityConverter}}">
 		<!-- Define Grid Columns -->
 		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="*"/>
 		</Grid.ColumnDefinitions>
 
-		<!-- Tickmark Timeline in the Center -->
-		<Canvas x:Name="SplineCanvas" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightGray" Width="640" Height="480" Grid.Column="1">
+		<!-- Spline Selection Dropdown -->
+		<ComboBox x:Name="SplineSelector" Width="200" Margin="10" Grid.Column="0" SelectionChanged="SplineSelector_SelectionChanged">
+			<ComboBoxItem Content="Spline 1"/>
+			<ComboBoxItem Content="Spline 2"/>
+			<ComboBoxItem Content="Spline 3"/>
+		</ComboBox>
+
+		<!-- Spline Canvas -->
+		<Canvas x:Name="SplineCanvas" HorizontalAlignment="Center" VerticalAlignment="Center" Background="LightGray" Width="640" Height="480" Grid.Column="1" MouseLeftButtonDown="SplineCanvas_MouseLeftButtonDown" MouseMove="SplineCanvas_MouseMove">
 		</Canvas>
 	</Grid>
 </Grid>

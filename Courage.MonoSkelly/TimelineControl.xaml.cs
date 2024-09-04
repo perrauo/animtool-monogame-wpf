@@ -84,11 +84,11 @@ namespace Courage.MonoSkelly
 
 		public bool IsKeyframeSelected => _selectedKeyframe != null;
 
-		private Point _dragStartPoint;
+		private Point _dragKeyframeStartPoint;
 
 		private Dictionary<Rectangle, AnimationStep> _keyframes = new Dictionary<Rectangle, AnimationStep>();
 
-		private DispatcherTimer _dragTimer;
+		private DispatcherTimer _dragKeyframeTimer;
 		
 
 		public TimelineControl()
@@ -108,9 +108,9 @@ namespace Courage.MonoSkelly
 			_framerate = double.TryParse(FramerateTextBox.Text, out double framerate) ? framerate : 24;
 			_frames = int.TryParse(FramesTextBox.Text, out int frames) ? frames : 100;
 
-			_dragTimer = new DispatcherTimer();
-			_dragTimer.Interval = TimeSpan.FromMilliseconds(DragDelayMilliseconds);
-			_dragTimer.Tick += DragTimer_Tick;
+			_dragKeyframeTimer = new DispatcherTimer();
+			_dragKeyframeTimer.Interval = TimeSpan.FromMilliseconds(DragDelayMilliseconds);
+			_dragKeyframeTimer.Tick += DragTimer_Tick;
 
 			// Update the timeline with the initial values
 			UpdateTimeline();
@@ -278,20 +278,17 @@ namespace Courage.MonoSkelly
 			if(IsDraggingKeyframe && e.LeftButton == MouseButtonState.Pressed)
 			{
 				Point currentPosition = e.GetPosition(TimelineCanvas);
-				double offset = currentPosition.X - _dragStartPoint.X;
+				double offset = currentPosition.X - _dragKeyframeStartPoint.X;
 				double newLeft = Canvas.GetLeft(_draggingKeyframe) + offset;
 				newLeft = Math.Max(0, Math.Min(TimelineCanvas.ActualWidth - _draggingKeyframe.Width, newLeft));
 				Canvas.SetLeft(_draggingKeyframe, newLeft);
-				_dragStartPoint = currentPosition;
+				_dragKeyframeStartPoint = currentPosition;
 			}
 			else if(e.LeftButton == MouseButtonState.Pressed)
 			{
-				Point currentPosition = e.GetPosition(TimelineCanvas);
-				if(!IsClickNearKeyframe(currentPosition))
-				{
-					// Move the playhead
-					MovePlayheadToPosition(currentPosition.X);
-				}
+				Point currentPosition = e.GetPosition(TimelineCanvas);				
+				// Move the playhead
+				MovePlayheadToPosition(currentPosition.X);				
 			}
 		}
 
@@ -448,16 +445,16 @@ namespace Courage.MonoSkelly
 			if(_draggingKeyframe != null) 
 			{
 				// Ensure the timer is stopped when dragging ends
-				_dragTimer.Stop();
+				_dragKeyframeTimer.Stop();
 				_draggingKeyframe.ReleaseMouseCapture();
-				_dragStartPoint = new Point(0, 0);
+				_dragKeyframeStartPoint = new Point(0, 0);
 			}
 
 			_draggingKeyframe = keyframe;
 
 			if(_draggingKeyframe != null)
 			{
-				_dragStartPoint = point;
+				_dragKeyframeStartPoint = point;
 				_draggingKeyframe.CaptureMouse();
 			}
 		}
@@ -477,21 +474,21 @@ namespace Courage.MonoSkelly
 			if(IsDraggingKeyframe && e.LeftButton == MouseButtonState.Pressed)
 			{
 				Point currentPosition = e.GetPosition(TimelineCanvas);
-				double offset = currentPosition.X - _dragStartPoint.X;
+				double offset = currentPosition.X - _dragKeyframeStartPoint.X;
 				double newLeft = Canvas.GetLeft(_draggingKeyframe) + offset;
 				newLeft = Math.Max(0, Math.Min(TimelineCanvas.ActualWidth - _draggingKeyframe.Width, newLeft));
 				Canvas.SetLeft(_draggingKeyframe, newLeft);
-				_dragStartPoint = currentPosition;
+				_dragKeyframeStartPoint = currentPosition;
 
 				// Reset the timer
-				_dragTimer.Stop();
-				_dragTimer.Start();
+				_dragKeyframeTimer.Stop();
+				_dragKeyframeTimer.Start();
 			}
 		}
 
 		private void DragTimer_Tick(object sender, EventArgs e)
 		{
-			_dragTimer.Stop();
+			_dragKeyframeTimer.Stop();
 
 			// Trigger the OnKeyframeChanged event
 			if(_keyframes.TryGetValue(_draggingKeyframe, out AnimationStep step))

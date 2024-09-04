@@ -1,4 +1,29 @@
-# Courage.MonoSkelly
+# Courage MonoSkelly
+
+### WPF front-end for the MonoSkelly Animation Editor built on top of the MonoGame framework
+
+## Features
+* Camera control
+    * Mouse-wheel to zoom in.
+    * Mouse-wheel click to pan
+    * Right-click + to rotate
+* Loading File
+    * ![Alt text](Resources/load1.png) 
+    * ![Alt text](Resources/load2.png) 
+* Playhead scrubbing, Playback Control, Frame Rate Control
+    * ![Alt text](Resources/misc.png) 
+
+## Work in progress
+* Keyframe manipulation
+    * ![Alt text](Resources/keyframe.png)
+
+## Wishlist
+* Keyframe creation/deletion
+* Animation creation/deletion
+* Transform manipulations 
+* Spline editor 
+* File management
+* Transform + Rotate Gizmos for the bones
 
 MonoGame embedded inside a WPF app as a `dotnet new` template.
 
@@ -12,41 +37,9 @@ This template uses .NET Core 6. If you're having trouble getting it to compile m
  - [.NET Core 6.0.422](https://dotnet.microsoft.com/download/dotnet-core/6.0) which should install with Visual Studio anyway.
  - The MonoGame NuGet packages are not .NET Core compatible, so you'll also need .NET Framework 4.7.2 installed.
 
-## Installing the template
+## Installing
 
-To install the `dotnet new` template, clone this repository locally and [install the template from a local directory](https://docs.microsoft.com/en-us/dotnet/core/tools/custom-templates#to-install-a-template-from-a-file-system-directory).
-
-```
-dotnet new install Courage.MonoSkelly
-```
-
-After the template is installed you should see it in the list. To create a new project, first create an empty directory then run the template.
-
-```
-mkdir MyLevelEditor
-cd MyLevelEditor
-dotnet new monogamewpf
-```
-
-All done! Open the solution and run the project.
-
-## Simple.
-
-There's no magic here.
-
- - The WPF project references the official [`MonoGame.Framework.WindowsDX` NuGet package](https://www.nuget.org/packages/MonoGame.Framework.WindowsDX/). The same package can be used in your game.
- - There's only a handful of files required to do the heavy lifting.
- - The `MonoGameContentControl` is a standard WPF control in every other way.
-
-## Modern.
-
-I've been using and refining the `MonoGameContentControl` in my own projects for many years. Everything else in this template was built from the ground up using the latest .NET technologies.
-
- - Thanks to the new `UseWPF` flag introduced in .NET Core 3.0 we can build WPF projects in the new `csproj` format.
- 
-## Customizable.
-
-All of the code used to embed MonoGame in WPF is included in this template. You can edit and customize it however you like.
-
- - The template includes a `MonoGameViewModel` as an example of how to get started. If you use a different view model architecture, just change it.
- - The project references the `MonoGame.Content.Builder.Task` package so that it can automatically build your `Content.mgcb` file. You can load content using the `Content` manager just like you do in your games. If your editor doesn't need this you can simply remove it and the .config\dotnet-tools.json file.
+* `git clone`
+* MonoGame is added as a submodule for easier debugging
+    * `git submodule`
+* Make sure that the `.human` ini file is placed in the saves folder created at the same location as the executable

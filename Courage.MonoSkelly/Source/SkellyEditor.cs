@@ -137,18 +137,17 @@ namespace MonoSkelly.Editor
 			_timelineControl.OnAnimationChanged(_animation);
 		}
 
-		void OnKeyframeChanged(int keyframe, float timestamp)
+		void OnKeyframeChanged(AnimationStep step, float timestamp)
 		{
 			if(_animation)
 			{
 				var anim = _skeleton.GetAnimation(_animation.Name);
 				if(anim != null)
 				{
-					var animStep = anim.GetStep(keyframe);
-					if(animStep != null)
-					{ 
-						
-					}
+					anim.SetStepAtTimestamp(step, timestamp);
+					// Start animation anew to account for keyframe changes
+					_animation = _skeleton.BeginAnimation(_animation.Name);
+					_animation.Update(_timelineControl.TimeStamp);
 				}
 			}
 		}

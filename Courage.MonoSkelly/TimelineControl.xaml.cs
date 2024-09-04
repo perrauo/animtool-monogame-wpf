@@ -2,6 +2,8 @@
 
 using MonoSkelly.Core;
 
+using SharpDX.Direct3D9;
+
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -9,24 +11,24 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading; // for use in windows form only
 
+using Line = System.Windows.Shapes.Line;
 using Point = System.Windows.Point;
 using Rectangle = System.Windows.Shapes.Rectangle;
 
 namespace Courage.MonoSkelly
 {
-	public partial class TimelineKeyframe
-	{
-		public int Index;
-		public double Time;
-	}
-
 	public partial class TimelineControl : Grid
 	{
+		private const double KeyframeMoveThreshold = 8.0;
+
+		private const int DragDelayMilliseconds = 500;
+
 		private double _framerate;
-		public double Framerate
+		public float Framerate
 		{
-			get => _framerate;
+			get => (float)_framerate;
 			set
 			{
 				_framerate = value;
@@ -34,16 +36,13 @@ namespace Courage.MonoSkelly
 		}
 
 		private double _frames;
-		public double Frames
+		private void SetFrames(double frames)
 		{
-			get => _frames;
-			set
-			{
-				_frames = value;
-				FramesTextBox.Text = value.ToString();
-				UpdateTimeline();
-			}
+			_frames = frames;
+			FramesTextBox.Text = frames.ToString();
+			UpdateTimeline();
 		}
+		public float Frames => (float)_frames;
 
 		private bool _isPlaying;
 		public bool IsPlaying => _isPlaying;
@@ -60,25 +59,22 @@ namespace Courage.MonoSkelly
 
 		public Action<string> OnAnimationSelected;
 
-		public Action<int, double> OnKeyframeChanged;
+		public Action<AnimationStep, float> OnKeyframeChanged;
 
 		private Animation _animation;
 
 		private double _currentFrame; // Use this field to track the current frame
 
-		public double CurrentFrame
+		public float CurrentFrame => (float)_currentFrame;
+
+		private void SetCurrentFrame(double currentFrame)
 		{
-			get => _currentFrame;
-			set
-			{
-				_currentFrame = value;
-				UpdatePlayheadPosition();
-			}
+			_currentFrame = currentFrame;
+			UpdatePlayheadPosition();
 		}
 
-		private const double KeyframeMoveThreshold = 5.0;
 
-		public readonly Point Zero = new Point(0, 0);
+		public float TimeStamp => (float)(_currentFrame / _framerate);
 
 		private Rectangle _draggingKeyframe;
 
@@ -90,7 +86,10 @@ namespace Courage.MonoSkelly
 
 		private Point _dragStartPoint;
 
-		private Dictionary<Rectangle, TimelineKeyframe> _keyframes = new Dictionary<Rectangle, TimelineKeyframe>();
+		private Dictionary<Rectangle, AnimationStep> _keyframes = new Dictionary<Rectangle, AnimationStep>();
+
+		private DispatcherTimer _dragTimer;
+		
 
 		public TimelineControl()
 		{
@@ -109,6 +108,10 @@ namespace Courage.MonoSkelly
 			_framerate = double.TryParse(FramerateTextBox.Text, out double framerate) ? framerate : 24;
 			_frames = int.TryParse(FramesTextBox.Text, out int frames) ? frames : 100;
 
+			_dragTimer = new DispatcherTimer();
+			_dragTimer.Interval = TimeSpan.FromMilliseconds(DragDelayMilliseconds);
+			_dragTimer.Tick += DragTimer_Tick;
+
 			// Update the timeline with the initial values
 			UpdateTimeline();
 		}
@@ -118,18 +121,18 @@ namespace Courage.MonoSkelly
 			if(_isPlaying)
 			{
 				double deltaTime = gameTime.ElapsedGameTime.TotalSeconds;
-				CurrentFrame += _framerate * deltaTime;
+				SetCurrentFrame(_currentFrame + _framerate * deltaTime);
 
 				if(CurrentFrame >= _frames)
 				{
 					if(_isRepeating)
 					{
-						CurrentFrame = 0;
+						SetCurrentFrame(0);
 						OnPlaybackFrame.Invoke(0f);
 					}
 					else
 					{
-						CurrentFrame = 0; // Reset the current frame
+						SetCurrentFrame(0); // Reset the current frame
 						Pause(); // Pause the animation
 					}
 				}
@@ -153,7 +156,7 @@ namespace Courage.MonoSkelly
 			_skeleton = skeleton;
 		}
 
-		private void AddKeyframe(int index, double timestamp)
+		private void AddKeyframe(AnimationStep step, double timestamp)
 		{
 			double position = (timestamp / _frames) * TimelineCanvas.ActualWidth;
 			Rectangle greenBar = new Rectangle
@@ -169,7 +172,7 @@ namespace Courage.MonoSkelly
 			greenBar.MouseMove += Keyframe_MouseMove;
 			greenBar.MouseLeftButtonUp += Keyframe_MouseLeftButtonUp;
 			TimelineCanvas.Children.Add(greenBar);
-			_keyframes.Add(greenBar, new TimelineKeyframe { Index = index, Time = timestamp });
+			_keyframes.Add(greenBar, step);
 		}
 
 		public void OnAnimationChanged(in AnimationState animation)
@@ -182,7 +185,7 @@ namespace Courage.MonoSkelly
 				totalTimeInSecs += step.Duration;
 			}
 
-			Frames = Framerate * totalTimeInSecs;
+			SetFrames(_framerate * totalTimeInSecs);
 
 			// Remove existing green bars
 			for(int i = TimelineCanvas.Children.Count - 1; i >= 0; i--)
@@ -193,12 +196,15 @@ namespace Courage.MonoSkelly
 				}
 			}
 
+			// Remove keyframes
+			_keyframes.Clear();
+
 			totalTimeInSecs = 0;
 			for(int i = 0; i < _animation.Steps.Count; i ++)
 			{
 				var step = _animation.Steps[i];
 				totalTimeInSecs += step.Duration;
-				AddKeyframe(i, Framerate * totalTimeInSecs);
+				AddKeyframe(step, Framerate * totalTimeInSecs);
 			}
 		}
 
@@ -247,7 +253,7 @@ namespace Courage.MonoSkelly
 				{
 					// Start dragging the keyframe
 					var keyframe = GetKeyframeAtPosition(clickPosition);
-					DragKeyframe(keyframe, clickPosition);
+					StartDraggingKeyframe(keyframe, clickPosition);
 					SelectKeyframe(keyframe);
 				}
 				else
@@ -255,7 +261,7 @@ namespace Courage.MonoSkelly
 					if(IsKeyframeSelected)
 					{
 						// First deselect the keyframe
-						DragKeyframe(null);
+						StartDraggingKeyframe(null);
 						SelectKeyframe(null);
 					}
 					else
@@ -381,12 +387,12 @@ namespace Courage.MonoSkelly
 
 		private void RewindButton_Click(object sender, RoutedEventArgs e)
 		{
-			CurrentFrame = 0;
+			SetCurrentFrame(0);
 		}
 
 		private void StepBackwardButton_Click(object sender, RoutedEventArgs e)
 		{
-			CurrentFrame = Math.Max(0, CurrentFrame - 1);
+			SetCurrentFrame(Math.Max(0, CurrentFrame - 1));
 		}
 
 		private void PlayPauseButton_Click(object sender, RoutedEventArgs e)
@@ -403,12 +409,12 @@ namespace Courage.MonoSkelly
 
 		private void StepForwardButton_Click(object sender, RoutedEventArgs e)
 		{
-			CurrentFrame = Math.Min(_frames, CurrentFrame + 1);
+			SetCurrentFrame(Math.Min(_frames, _currentFrame + 1));
 		}
 
 		private void FastForwardButton_Click(object sender, RoutedEventArgs e)
 		{
-			CurrentFrame = _frames;
+			SetCurrentFrame(_frames);
 		}
 
 		private void RepeatButton_Click(object sender, RoutedEventArgs e)
@@ -437,10 +443,12 @@ namespace Courage.MonoSkelly
 			}
 		}
 
-		private void DragKeyframe(Rectangle keyframe, in Point point=default)
+		private void StartDraggingKeyframe(Rectangle keyframe, in Point point=default)
 		{
 			if(_draggingKeyframe != null) 
 			{
+				// Ensure the timer is stopped when dragging ends
+				_dragTimer.Stop();
 				_draggingKeyframe.ReleaseMouseCapture();
 				_dragStartPoint = new Point(0, 0);
 			}
@@ -451,16 +459,14 @@ namespace Courage.MonoSkelly
 			{
 				_dragStartPoint = point;
 				_draggingKeyframe.CaptureMouse();
-
 			}
 		}
-
 
 		private void Keyframe_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		{
 			if(e.LeftButton == MouseButtonState.Pressed)
 			{
-				DragKeyframe(sender as Rectangle, e.GetPosition(TimelineCanvas));
+				StartDraggingKeyframe(sender as Rectangle, e.GetPosition(TimelineCanvas));
 				// Handle selection
 				SelectKeyframe(_draggingKeyframe);
 			}
@@ -477,19 +483,30 @@ namespace Courage.MonoSkelly
 				Canvas.SetLeft(_draggingKeyframe, newLeft);
 				_dragStartPoint = currentPosition;
 
-				// Calculate the new current frame based on the mouse position
-				if(_keyframes.TryGetValue(_draggingKeyframe, out TimelineKeyframe keyframe))
-				{
-					double newFrame = (currentPosition.X / TimelineCanvas.ActualWidth) * _frames;
-					newFrame = Math.Max(0, Math.Min(_frames, newFrame));
-					OnKeyframeChanged.Invoke(keyframe.Index, newFrame);
-				}
+				// Reset the timer
+				_dragTimer.Stop();
+				_dragTimer.Start();
+			}
+		}
+
+		private void DragTimer_Tick(object sender, EventArgs e)
+		{
+			_dragTimer.Stop();
+
+			// Trigger the OnKeyframeChanged event
+			if(_keyframes.TryGetValue(_draggingKeyframe, out AnimationStep step))
+			{
+				double newFrame = (Canvas.GetLeft(_draggingKeyframe) / TimelineCanvas.ActualWidth) * _frames;
+				newFrame = Math.Max(0, Math.Min(_frames, newFrame));
+				float timestamp = (float)(newFrame / _framerate);
+				// TODO: Fix this
+				//OnKeyframeChanged?.Invoke(step, timestamp);
 			}
 		}
 
 		private void Keyframe_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
 		{
-			DragKeyframe(null);
+			StartDraggingKeyframe(null);
 		}
 
 		private void UpdateRepeatButtonAppearance()

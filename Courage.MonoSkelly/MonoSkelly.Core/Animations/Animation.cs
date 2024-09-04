@@ -2,7 +2,9 @@
  * MonoSkelly Animation.
  * Ronen Ness 2021
  */
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 
 namespace MonoSkelly.Core
@@ -180,6 +182,81 @@ namespace MonoSkelly.Core
             }
             return _steps[index];
         }
-    }
 
+		/// <summary>
+		/// Get animation step from index.
+		/// </summary>
+		/// <param name="step">If true, will wrap index if out of range.</param>
+		public int GetStepIndex(AnimationStep step)
+		{
+            return _steps.IndexOf(step);
+		}
+
+        // TODO: This method is incorrect; fix it
+		public void SetStepAtTimestamp(AnimationStep step, float timestamp)
+		{
+            {
+                // Calculate the total duration of the animation
+                float totalDuration = _steps.Sum(x => x.Duration);
+                float totalDurationMinusStep = totalDuration - step.Duration;
+
+                // If the timestamp is greater than the total duration, adjust the step duration and add it at the end
+                if(timestamp >= totalDurationMinusStep)
+                {
+                    step.Duration = timestamp - totalDurationMinusStep;
+                    _steps.Remove(step);
+                    _steps.Add(step);
+                    return;
+                }
+            }
+
+			// Find the correct position for the step
+			float startTime = 0f;
+			int index = 0;
+			for(; index < _steps.Count; index++)
+			{
+				if(startTime + _steps[index].Duration > timestamp)
+				{
+					break;
+				}
+				startTime += _steps[index].Duration;
+			}
+
+            int previousIndex = _steps.IndexOf(step);
+
+            // Insert the step at the correct index
+            if(index != previousIndex)
+            {
+                _steps.Insert(index, step);
+                if(previousIndex >= 0)
+                {
+                    // If previous index is before new position, then we need to remove at the same position
+                    // since it has no impact on it. Otherwise the previous index has changed
+                    _steps.RemoveAt(index > previousIndex ?
+                        previousIndex :
+                        previousIndex + 1
+                        );
+                }
+            }
+
+			// Adjust the duration of the step
+			step.Duration = timestamp - startTime;
+
+            // TODO: The problem is here, subsequent durations should be calculated as
+            // The portion of the old subsequent duration discarding the portion of the moved duration which overlaps
+            // I am not sure how to compute this for now
+            float currentTime = timestamp;
+
+			// Adjust the durations of the subsequent steps
+			for(int i = index + 1; i < _steps.Count; i++)
+			{
+				// Update the start time of the subsequent steps
+				currentTime += _steps[i].Duration;
+				
+				// Update the duration of the step
+				_steps[i].Duration = currentTime - currentTime;
+				
+			}
+		}
+	}
 }

@@ -88,7 +88,7 @@
 				</ItemsControl>
 			</Grid>
 			<!-- Playhead -->
-			<Line x:Name="Playhead" X1="0" Y1="0" X2="0" Y2="{Binding ActualHeight, ElementName=TimelineCanvas}" Stroke="Red" StrokeThickness="2" VerticalAlignment="Center" Width="{Binding ActualWidth, ElementName=TimelineCanvas}" Height="{Binding ActualHeight, ElementName=TimelineCanvas}" Canvas.Top="15" Canvas.Left="20" />
+			<Line x:Name="Playhead" X1="0" Y1="0" X2="0" Y2="{Binding ActualHeight, ElementName=TimelineCanvas}" Stroke="Red" StrokeThickness="2" VerticalAlignment="Center" Width="{Binding ActualWidth, ElementName=TimelineCanvas}" Height="{Binding ActualHeight, ElementName=TimelineCanvas}" Canvas.Top="15" Canvas.Left="0" />
 		</Canvas>
 
 		<!-- Playback Controls on the Right -->

@@ -117,6 +117,7 @@ namespace MonoSkelly.Editor
 			_timelineControl = _mainWindow.FindChild<TimelineControl>();
 			_timelineControl.OnPlaybackFrame += OnPlaybackFrame;
 			_timelineControl.OnAnimationSelected += OnAnimationChanged;
+			_timelineControl.OnKeyframeChanged += OnKeyframeChanged;
 
 			// create skeleton and camera
 			_skeleton = new Skeleton();
@@ -134,6 +135,22 @@ namespace MonoSkelly.Editor
 		{
 			_animation = _skeleton.BeginAnimation(animation);
 			_timelineControl.OnAnimationChanged(_animation);
+		}
+
+		void OnKeyframeChanged(int keyframe, float timestamp)
+		{
+			if(_animation)
+			{
+				var anim = _skeleton.GetAnimation(_animation.Name);
+				if(anim != null)
+				{
+					var animStep = anim.GetStep(keyframe);
+					if(animStep != null)
+					{ 
+						
+					}
+				}
+			}
 		}
 
 		void OnPlaybackFrame(float delta)

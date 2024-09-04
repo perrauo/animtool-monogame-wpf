@@ -25,6 +25,8 @@
 * File management
 * Transform + Rotate Gizmos for the bones
 
+## Details
+
 MonoGame embedded inside a WPF app as a `dotnet new` template.
 
 ![obligatory screenshot](.template.config/screenshot.png)
